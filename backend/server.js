@@ -1,13 +1,23 @@
 const express = require('express');
 const cors = require('cors');
+const cookieParser = require('cookie-parser');
 require('dotenv').config();
 const connectDB = require('./utils/dbConnection');
-
+const passport = require('passport');
+require('./utils/passport');
+const authRoute = require('./routes/auth');
 connectDB();
 const app = express();
 
-app.use(cors());
+app.use(cors({
+    origin: "http://localhost:3000", // frontend URL
+    credentials: true
+}));
+
 app.use(express.json());
+app.use(cookieParser());
+app.use(passport.initialize());
+app.use('/api/auth', authRoute);
 
 const PORT = process.env.PORT || 5000;
 

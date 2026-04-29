@@ -1,6 +1,7 @@
-import passport from "passport";
-import { Strategy as GoogleStrategy } from "passport-google-oauth20";import jwt from "jsonwebtoken";
-import User from "../models/user.js";
+const passport = require("passport");
+const GoogleStrategy = require("passport-google-oauth20").Strategy;
+const jwt = require("jsonwebtoken");
+const User = require("../models/user");
 
 passport.use(new GoogleStrategy ({
     clientID: process.env.GOOGLE_CLIENT_ID,
@@ -10,7 +11,7 @@ passport.use(new GoogleStrategy ({
 
 async (accessToken, refreshToken, profile, done) => {
     try{
-        const email = profile.emails[0].value;
+        const email = profile.emails[0]?.value;
         let user = await User.findOne({email: email});
 
         if(!user){
@@ -18,13 +19,13 @@ async (accessToken, refreshToken, profile, done) => {
                 name: profile.displayName,
                 email: email,
                 googleId: profile.id,
-                avatar: profile.photos[0].value
+                avatar: profile.photos[0]?.value
             })
         }
 
         if(user && !user.googleId){
             user.googleId = profile.id;
-            user.avatar = profile.photos[0].value;
+            user.avatar = profile.photos[0]?.value;
             await user.save();
         }
 
