@@ -49,11 +49,11 @@ export function Home() {
   const [wordVisible, setWordVisible] = useState(true);
   const [prompt, setPrompt] = useState("");
   const [focused, setFocused] = useState(false);
-  const textRef = useRef<HTMLTextAreaElement>(null);
-  const pricingRef = useRef<HTMLDivElement | null>(null);
-  const featuresRef = useRef<HTMLDivElement | null>(null);
-  const howItWorksRef = useRef<HTMLDivElement | null>(null);
-  const showCaseRef = useRef<HTMLDivElement | null>(null);
+  const textRef = useRef(null);
+  const pricingRef = useRef(null);
+  const featuresRef = useRef(null);
+  const howItWorksRef = useRef(null);
+  const showCaseRef = useRef(null);
 
   useEffect(() => {
     const t = setInterval(() => {
