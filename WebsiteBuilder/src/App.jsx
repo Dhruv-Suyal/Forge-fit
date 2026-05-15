@@ -5,6 +5,7 @@ import { LoginPage } from "./pages/loginPage";
 import "./App.css"
 import ProtectedRoute from "./components/protectedRoute";
 import { useAuth } from "./context/AuthContext";
+import { Onboarding } from "./pages/Onboarding";
 
 export function App(){
 
@@ -15,7 +16,10 @@ export function App(){
     <Routes>
         <Route path="/signUp" element={<SignUp/>}/>
         <Route path="/logIn" element={<LoginPage/>}/>
-        <Route path="/" element={<Home/>}/>
+        <Route path="/" element={<ProtectedRoute><Home/></ProtectedRoute>}/>
+        <Route path="/onboarding" element={<ProtectedRoute>
+          <Onboarding/>
+        </ProtectedRoute>}/>
 
     </Routes>
   </BrowserRouter>

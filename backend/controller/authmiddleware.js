@@ -1,6 +1,9 @@
 const bcrypt = require('bcryptjs');
 const jwt =  require('jsonwebtoken');
 const { default: User } = require('../models/User');
+const { default: Profile } = require('../models/Profile');
+const TodayTask = require('../models/TodayTask');
+const generateTasksWithAI = require('../services/TodayTaskGenerate');
 
 exports.postSignUp = async (req, res)=>{
     try{
@@ -76,7 +79,8 @@ exports.postLogin = async (req, res)=>{
         res.cookie("token", token, {
             httpOnly:true,
             secure:process.env.NODE_ENV === 'production',
-            sameSite:"lax"
+            sameSite:"lax",
+            maxAge: 7 * 24 * 60 * 60 * 1000
         });
 
         const {password:_, ...safeUser} = existUser._doc;
@@ -89,12 +93,119 @@ exports.postLogin = async (req, res)=>{
     }
 }
 
+exports.saveProfile = async(req,res)=>{
+   try{
+      console.log("come to the backend")
+      const {
+         displayName,
+         dateofBirth,
+         biologicalSex,
+         height,
+         weight,
+         location,
+         primaryGoal
+      } = req.body;
+      console.log(req.body)
+      const bmi = (
+         weight / ((height/100) * (height/100))
+      ).toFixed(1);
+
+      const tdee = Math.round(weight * 24 * 1.55);
+
+      const profile = await Profile.create({
+         userId:req.user.id,
+         displayName,
+         dateofBirth,
+         biologicalSex,
+         height,
+         weight,
+         location,
+         primaryGoal,
+         bmi,
+         tdee
+      });
+      console.log("profile created");
+
+      await User.findByIdAndUpdate(req.user.id,{
+         onboardingCompleted:true
+      });
+
+      const today =
+      new Date().toISOString().split('T')[0];
+
+      // prevent duplicates
+      const existingTasks =
+      await TodayTask.find({
+         userId:req.user.id,
+         date: today
+      });
+
+      if(existingTasks.length <= 0){
+
+        // AI generation
+      const aiData =
+      await generateTasksWithAI(profile);
+
+      // attach userId + date
+      const tasks =
+      aiData.tasks.map(task => ({
+         ...task,
+         userId:req.user.id,
+         date: today
+      }));
+
+      // save
+      const formattedTasks = tasks.map(task => ({
+
+        ...task,
+
+        category:
+        task.category
+            ?.toLowerCase()
+            ?.trim(),
+
+        difficulty:
+            task.difficulty
+                ?.toLowerCase()
+                ?.trim()
+
+        }));
+
+        await TodayTask.insertMany(formattedTasks);
+      }
+
+      res.json({
+         success:true,
+         profile
+      });
+
+   }catch(error){
+      res.status(500).json({
+         success:false,
+         message:error.message
+      })
+   }
+}
+
+exports.getProfile = async (req, res) => {
+  try {
+    const profile = await Profile.findOne({ userId: req.user.id });
+    res.json({
+      success: true,
+      profile: profile || null
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
+
 exports.getLogout = (req, res) => {
 
   res.clearCookie("token", {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
-    sameSite: process.env.NODE_ENV === "production" ? "none" : "lax"
+    sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+     maxAge: 7 * 24 * 60 * 60 * 1000
   });
 
   res.json({

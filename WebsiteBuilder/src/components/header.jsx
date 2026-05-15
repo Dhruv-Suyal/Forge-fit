@@ -1,355 +1,546 @@
 import { useState, useEffect, useRef } from "react";
-import gsap from "gsap";
-import ScrollToPlugin from "gsap/ScrollToPlugin";
-import { useGSAP } from "@gsap/react";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import { useNavigate } from "react-router-dom";
 import api from "../utils/axios";
 
-gsap.registerPlugin(ScrollToPlugin);
+// ─── NAV LINKS ────────────────────────────────────────────────────────────────
+const NAV_LINKS = [
+  { label: "Today's Diet",    path: "/diet",     icon: "◈" },
+  { label: "Exercise Plan",   path: "/exercise",  icon: "⚡" },
+  { label: "My Health",       path: "/health",    icon: "◎" },
+];
 
-// Initials avatar — no broken image ever
-function UserAvatar({ user, size = "w-10 h-10", textSize = "text-sm" }) {
+// ─── USER AVATAR ──────────────────────────────────────────────────────────────
+function Avatar({ user, size = 36 }) {
   const initials = user?.name
-  ? user.name
-      .split(" ")
-      .map((n) => n[0])
-      .join("")
-      .slice(0, 2)
-      .toUpperCase()
-  : "P";
+    ? user.name.split(" ").map(n => n[0]).join("").slice(0, 2).toUpperCase()
+    : "U";
+
+  if (user?.photo) {
+    return (
+      <img
+        src={user.photo}
+        alt={user.name || "User"}
+        style={{
+          width: size, height: size, borderRadius: "50%",
+          border: "1.5px solid rgba(0,245,212,0.35)",
+          boxShadow: "0 0 12px rgba(0,245,212,0.25)",
+          objectFit: "cover", display: "block",
+        }}
+      />
+    );
+  }
 
   return (
-    <div
-      className={`${size} ${textSize} rounded-full flex items-center justify-center font-bold text-white select-none shrink-0`}
-      style={{
-        background: "linear-gradient(135deg,#6366f1,#8b5cf6)",
-        border: "2px solid rgba(99,102,241,0.4)",
-        boxShadow: "0 0 14px rgba(99,102,241,0.3)",
-      }}
-    >
+    <div style={{
+      width: size, height: size, borderRadius: "50%",
+      background: "linear-gradient(135deg,#00f5d4 0%,#7c3aed 100%)",
+      border: "1.5px solid rgba(0,245,212,0.35)",
+      boxShadow: "0 0 12px rgba(0,245,212,0.25)",
+      display: "flex", alignItems: "center", justifyContent: "center",
+      fontSize: size * 0.36, fontWeight: 700, color: "#000",
+      fontFamily: "'Sora',sans-serif", userSelect: "none", flexShrink: 0,
+    }}>
       {initials}
     </div>
   );
 }
 
-export function Header({ pricingRef, howItWorksRef, featuresRef, showCaseRef }) {
-  const [scrolled, setScrolled]         = useState(false);
-  const [menuOpen, setMenuOpen]         = useState(false);
-  const [accountOpen, setAccountOpen]   = useState(false); // mobile accordion
-  const [dropdownOpen, setDropdownOpen] = useState(false); // desktop dropdown
-  const dropdownRef = useRef(null);
+// ─── HEADER ───────────────────────────────────────────────────────────────────
+export function Header() {
   const { user, setUser } = useAuth();
-  const navigate = useNavigate();
+  const navigate          = useNavigate();
+  const location          = useLocation();
+  const [scrolled,      setScrolled]      = useState(false);
+  const [mobileOpen,    setMobileOpen]    = useState(false);
+  const [profileOpen,   setProfileOpen]   = useState(false);
+  const profileRef = useRef(null);
 
-  const navLinks = [
-    { label: "Features",     ref: featuresRef },
-    { label: "How It Works", ref: howItWorksRef },
-    { label: "Pricing",      ref: pricingRef },
-    { label: "Showcase",     ref: showCaseRef },
-  ];
-
-  // Scroll detection
+  // ── scroll detection ──
   useEffect(() => {
-    const fn = () => setScrolled(window.scrollY > 30);
-    window.addEventListener("scroll", fn);
+    const fn = () => setScrolled(window.scrollY > 24);
+    window.addEventListener("scroll", fn, { passive: true });
     return () => window.removeEventListener("scroll", fn);
   }, []);
 
-  // Close desktop dropdown on outside click
+  // ── close desktop dropdown on outside click ──
   useEffect(() => {
-    const fn = (e) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
-        setDropdownOpen(false);
-      }
+    const fn = e => {
+      if (profileRef.current && !profileRef.current.contains(e.target))
+        setProfileOpen(false);
     };
     document.addEventListener("mousedown", fn);
     return () => document.removeEventListener("mousedown", fn);
   }, []);
 
-  // Close mobile menu on resize to desktop
+  // ── close mobile menu on route change ──
+  useEffect(() => { setMobileOpen(false); setProfileOpen(false); }, [location.pathname]);
+
+  // ── close mobile menu on desktop resize ──
   useEffect(() => {
-    const fn = () => {
-      if (window.innerWidth >= 768) {
-        setMenuOpen(false);
-        setAccountOpen(false);
-      }
-    };
+    const fn = () => { if (window.innerWidth >= 768) setMobileOpen(false); };
     window.addEventListener("resize", fn);
     return () => window.removeEventListener("resize", fn);
   }, []);
 
-  function scrollTo(ref) {
-    if (!ref?.current) return;
-    setMenuOpen(false);
-    setAccountOpen(false);
-    gsap.to(window, { duration: 0.5, scrollTo: { y: ref.current, offsetY: 120 } });
-  }
-
-  function handleNav(path) {
-    setDropdownOpen(false);
-    setMenuOpen(false);
-    setAccountOpen(false);
-    navigate(path);
-  }
-
   async function handleLogout() {
-    setDropdownOpen(false);
-    setMenuOpen(false);
-    setAccountOpen(false);
-    try {
-      api.get("/auth/logout").then(()=>{
-        setUser(null);
-        navigate("/");
-      })
-    } catch (err) {
-      console.error("Logout failed:", err);
-    }
+    setProfileOpen(false); setMobileOpen(false);
+    try { await api.get("/auth/logout"); } catch {}
+    setUser(null);
+    navigate("/");
   }
 
-  useGSAP(() => {
-    gsap.from("#LOGO, #NAVACCOUNT, .HAMBURGER", {
-      y: -15, opacity: 0, delay: 0.8, duration: 1,
-    });
-    gsap.from(".NAVLINK", {
-      y: -15, opacity: 0, delay: 0.8, duration: 1, stagger: 0.15,
-    });
-  });
+  const isActive = path => location.pathname === path;
 
   return (
     <>
-      {/* ── NAV BAR ───────────────────────────────────────────────────── */}
-      <nav
-        className={`fixed top-0 inset-x-0 z-50 transition-all duration-300 ${
-          scrolled ? "bg-[#00000c]/88 backdrop-blur-2xl border-b border-white/6" : ""
-        }`}
-      >
-        <div className="max-w-[1200px] mx-auto px-7 h-[68px] flex items-center justify-between gap-5">
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap');
 
-          {/* Logo */}
-          <div id="LOGO" onClick={() => navigate("/")}
-            className="flex items-center gap-2.5 cursor-pointer shrink-0">
-            <div
-              className="w-9 h-9 rounded-[10px] flex items-center justify-center text-lg font-bold text-white"
-              style={{ background: "linear-gradient(135deg,#6366f1,#8b5cf6)", boxShadow: "0 0 20px rgba(99,102,241,0.5)" }}
-            >
-              W
-            </div>
-            <span className="text-[17px] font-bold text-white tracking-tight">
-              Forge<em className="not-italic grad-text">AI</em>
-            </span>
+        .ffit-header {
+          position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+          height: 64px;
+          display: flex; align-items: center;
+          transition: background 0.3s, border-color 0.3s, backdrop-filter 0.3s;
+          font-family: 'Sora', sans-serif;
+        }
+        .ffit-header.scrolled {
+          background: rgba(0,0,14,0.88);
+          backdrop-filter: blur(24px);
+          -webkit-backdrop-filter: blur(24px);
+          border-bottom: 1px solid rgba(0,245,212,0.1);
+        }
+        .ffit-header.top {
+          background: linear-gradient(180deg, rgba(0,0,14,0.7) 0%, transparent 100%);
+        }
+
+        /* inner layout */
+        .ffit-inner {
+          width: 100%; max-width: 1280px; margin: 0 auto;
+          padding: 0 20px;
+          display: flex; align-items: center; gap: 12px;
+        }
+
+        /* LOGO */
+        .ffit-logo {
+          display: flex; align-items: center; gap: 8px;
+          cursor: pointer; flex-shrink: 0; text-decoration: none;
+        }
+        .ffit-logo-icon {
+          width: 32px; height: 32px; border-radius: 9px;
+          background: linear-gradient(135deg,#00f5d4,#7c3aed);
+          display: flex; align-items: center; justify-content: center;
+          font-size: 15px; box-shadow: 0 0 14px rgba(0,245,212,0.4);
+          flex-shrink: 0;
+        }
+        .ffit-logo-text {
+          font-size: 16px; font-weight: 800; color: #fff; letter-spacing: -0.4px;
+          white-space: nowrap;
+        }
+        .ffit-logo-text em {
+          font-style: normal;
+          background: linear-gradient(90deg,#00f5d4,#7c3aed);
+          -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+
+        /* DESKTOP NAV */
+        .ffit-nav {
+          display: flex; align-items: center; gap: 2px;
+          flex: 1; /* takes remaining space, links left-align */
+          margin-left: 28px;
+        }
+        @media (max-width: 767px) { .ffit-nav { display: none; } }
+
+        .ffit-nav-link {
+          display: flex; align-items: center; gap: 7px;
+          padding: 7px 14px; border-radius: 10px;
+          font-size: 13px; font-weight: 600; color: rgba(255,255,255,0.38);
+          cursor: pointer; border: none; background: transparent;
+          transition: color 0.18s, background 0.18s;
+          white-space: nowrap; position: relative; text-decoration: none;
+          font-family: 'Sora', sans-serif;
+        }
+        .ffit-nav-link:hover {
+          color: rgba(255,255,255,0.85);
+          background: rgba(255,255,255,0.05);
+        }
+        .ffit-nav-link.active {
+          color: #00f5d4;
+          background: rgba(0,245,212,0.07);
+        }
+        .ffit-nav-link.active::after {
+          content: '';
+          position: absolute; bottom: 2px; left: 50%; transform: translateX(-50%);
+          width: 18px; height: 2px; border-radius: 99px;
+          background: #00f5d4; box-shadow: 0 0 8px rgba(0,245,212,0.6);
+        }
+        .ffit-nav-icon {
+          font-size: 13px; opacity: 0.6;
+        }
+        .ffit-nav-link.active .ffit-nav-icon { opacity: 1; }
+
+        /* RIGHT SECTION */
+        .ffit-right {
+          display: flex; align-items: center; gap: 10px; margin-left: auto;
+        }
+
+        /* PROFILE BUTTON */
+        .ffit-profile-btn {
+          display: flex; align-items: center; gap: 9px;
+          background: rgba(255,255,255,0.04);
+          border: 1px solid rgba(255,255,255,0.08);
+          border-radius: 99px; padding: 4px 12px 4px 4px;
+          cursor: pointer; transition: border-color 0.2s, background 0.2s;
+        }
+        .ffit-profile-btn:hover {
+          border-color: rgba(0,245,212,0.3);
+          background: rgba(0,245,212,0.04);
+        }
+        .ffit-profile-name {
+          font-family: 'Sora', sans-serif;
+          font-size: 13px; font-weight: 600; color: rgba(255,255,255,0.75);
+          max-width: 100px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+        }
+        .ffit-chevron {
+          font-size: 9px; color: rgba(0,245,212,0.5);
+          transition: transform 0.2s;
+          font-family: 'JetBrains Mono', monospace;
+        }
+        .ffit-chevron.open { transform: rotate(180deg); }
+
+        /* DROPDOWN */
+        .ffit-dropdown {
+          position: absolute; top: calc(100% + 10px); right: 0;
+          min-width: 220px;
+          background: rgba(0,0,18,0.97);
+          border: 1px solid rgba(0,245,212,0.15);
+          border-radius: 16px; overflow: hidden;
+          box-shadow: 0 20px 60px rgba(0,0,0,0.7), 0 0 0 1px rgba(0,245,212,0.05);
+          backdrop-filter: blur(24px);
+          transform-origin: top right;
+          transition: opacity 0.18s, transform 0.18s, visibility 0.18s;
+        }
+        .ffit-dropdown.open  { opacity: 1; transform: scale(1) translateY(0); visibility: visible; }
+        .ffit-dropdown.closed { opacity: 0; transform: scale(0.95) translateY(-6px); visibility: hidden; }
+
+        .ffit-dd-header {
+          padding: 14px 16px 12px;
+          border-bottom: 1px solid rgba(255,255,255,0.05);
+          display: flex; align-items: center; gap: 11px;
+        }
+        .ffit-dd-name  { font-size: 13px; font-weight: 700; color: #e2e8f0; }
+        .ffit-dd-email { font-size: 11px; color: rgba(255,255,255,0.3); margin-top: 2px; font-family: 'JetBrains Mono', monospace; }
+
+        .ffit-dd-body { padding: 6px; }
+
+        .ffit-dd-item {
+          width: 100%; display: flex; align-items: center; gap: 10px;
+          padding: 10px 12px; border-radius: 10px; border: none;
+          background: transparent; cursor: pointer; text-align: left;
+          font-family: 'Sora', sans-serif; font-size: 13px; font-weight: 500;
+          color: rgba(255,255,255,0.5); transition: color 0.15s, background 0.15s;
+        }
+        .ffit-dd-item:hover { color: #e2e8f0; background: rgba(0,245,212,0.07); }
+        .ffit-dd-item.danger { color: rgba(239,68,68,0.7); }
+        .ffit-dd-item.danger:hover { color: #f87171; background: rgba(239,68,68,0.08); }
+        .ffit-dd-sep { height: 1px; background: rgba(255,255,255,0.05); margin: 4px 6px; }
+        .ffit-dd-icon { font-size: 14px; flex-shrink: 0; width: 18px; text-align: center; }
+
+        /* AUTH BUTTONS */
+        .ffit-btn-ghost {
+          padding: 8px 16px; border-radius: 10px; font-size: 13px; font-weight: 600;
+          color: rgba(255,255,255,0.45); border: 1px solid rgba(255,255,255,0.08);
+          background: transparent; cursor: pointer; font-family: 'Sora', sans-serif;
+          transition: color 0.2s, border-color 0.2s;
+        }
+        .ffit-btn-ghost:hover { color: #e2e8f0; border-color: rgba(0,245,212,0.3); }
+
+        .ffit-btn-primary {
+          padding: 8px 18px; border-radius: 10px; font-size: 13px; font-weight: 700;
+          color: #000; border: none; cursor: pointer; font-family: 'Sora', sans-serif;
+          background: linear-gradient(135deg,#00f5d4,#7c3aed);
+          box-shadow: 0 4px 20px rgba(0,245,212,0.3);
+          transition: transform 0.15s, box-shadow 0.15s;
+        }
+        .ffit-btn-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 24px rgba(0,245,212,0.4); }
+
+        /* HAMBURGER */
+        .ffit-hamburger {
+          display: none;
+          flex-direction: column; gap: 5px;
+          padding: 8px; border: 1px solid rgba(255,255,255,0.08);
+          border-radius: 10px; background: transparent; cursor: pointer;
+          transition: border-color 0.2s;
+        }
+        .ffit-hamburger:hover { border-color: rgba(0,245,212,0.3); }
+        @media (max-width: 767px) { .ffit-hamburger { display: flex; } }
+
+        .ffit-bar {
+          display: block; width: 20px; height: 1.5px;
+          background: rgba(255,255,255,0.45); border-radius: 99px;
+          transition: transform 0.28s, opacity 0.28s, background 0.28s;
+        }
+        .ffit-bar1.open { transform: translateY(6.5px) rotate(45deg); background: #00f5d4; }
+        .ffit-bar2.open { opacity: 0; transform: scaleX(0); }
+        .ffit-bar3.open { transform: translateY(-6.5px) rotate(-45deg); background: #00f5d4; }
+
+        /* MOBILE MENU */
+        .ffit-mobile {
+          position: fixed; left: 0; right: 0; top: 64px; z-index: 99;
+          background: rgba(0,0,14,0.97);
+          backdrop-filter: blur(28px); -webkit-backdrop-filter: blur(28px);
+          border-bottom: 1px solid rgba(0,245,212,0.1);
+          overflow: hidden;
+          transition: max-height 0.35s cubic-bezier(.22,1,.36,1), opacity 0.25s;
+        }
+        .ffit-mobile.open   { max-height: 600px; opacity: 1; pointer-events: auto; }
+        .ffit-mobile.closed { max-height: 0;     opacity: 0; pointer-events: none; }
+
+        .ffit-mobile-inner { padding: 12px 20px 24px; }
+
+        /* mobile user row */
+        .ffit-mob-user {
+          display: flex; align-items: center; gap: 12px;
+          padding: 14px 0; border-bottom: 1px solid rgba(255,255,255,0.06);
+          margin-bottom: 8px;
+        }
+        .ffit-mob-user-info {}
+        .ffit-mob-name  { font-size: 15px; font-weight: 700; color: #e2e8f0; }
+        .ffit-mob-email { font-size: 11px; color: rgba(255,255,255,0.3); font-family:'JetBrains Mono',monospace; margin-top:2px; }
+
+        /* mobile nav links */
+        .ffit-mob-link {
+          display: flex; align-items: center; gap: 12px;
+          padding: 13px 4px; border-bottom: 1px solid rgba(255,255,255,0.05);
+          font-size: 15px; font-weight: 600; color: rgba(255,255,255,0.4);
+          cursor: pointer; transition: color 0.18s; text-decoration: none;
+          font-family: 'Sora', sans-serif;
+        }
+        .ffit-mob-link:last-child { border-bottom: none; }
+        .ffit-mob-link:hover { color: rgba(255,255,255,0.85); }
+        .ffit-mob-link.active { color: #00f5d4; }
+        .ffit-mob-icon {
+          width: 32px; height: 32px; border-radius: 9px;
+          display: flex; align-items: center; justify-content: center; font-size: 14px;
+          background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.06);
+          flex-shrink: 0; transition: background 0.18s, border-color 0.18s;
+        }
+        .ffit-mob-link.active .ffit-mob-icon {
+          background: rgba(0,245,212,0.1); border-color: rgba(0,245,212,0.25);
+        }
+
+        /* mobile account actions */
+        .ffit-mob-actions { padding-top: 12px; display: flex; flex-direction: column; gap: 8px; }
+        .ffit-mob-action {
+          display: flex; align-items: center; gap: 12px;
+          padding: 12px 14px; border-radius: 12px;
+          font-size: 14px; font-weight: 600; cursor: pointer; border: none;
+          background: rgba(255,255,255,0.03); transition: background 0.18s, color 0.18s;
+          font-family: 'Sora', sans-serif; color: rgba(255,255,255,0.45); text-align:left; width:100%;
+        }
+        .ffit-mob-action:hover { background: rgba(0,245,212,0.06); color: #e2e8f0; }
+        .ffit-mob-action.danger { color: rgba(239,68,68,0.65); }
+        .ffit-mob-action.danger:hover { background: rgba(239,68,68,0.08); color: #f87171; }
+
+        /* mobile auth */
+        .ffit-mob-auth { display: flex; flex-direction:column; gap:10px; padding-top:16px; border-top:1px solid rgba(255,255,255,0.06); margin-top:4px; }
+        .ffit-mob-auth-ghost { width:100%; padding:13px; border-radius:12px; font-size:14px; font-weight:600; background:transparent; border:1px solid rgba(255,255,255,0.08); color:rgba(255,255,255,0.45); cursor:pointer; font-family:'Sora',sans-serif; transition:all 0.2s; }
+        .ffit-mob-auth-ghost:hover { color:#e2e8f0; border-color:rgba(0,245,212,0.3); }
+        .ffit-mob-auth-primary { width:100%; padding:13px; border-radius:12px; font-size:14px; font-weight:700; background:linear-gradient(135deg,#00f5d4,#7c3aed); color:#000; border:none; cursor:pointer; font-family:'Sora',sans-serif; box-shadow:0 4px 20px rgba(0,245,212,0.25); }
+
+        /* score chip */
+        .ffit-score-chip {
+          display: flex; align-items: center; gap: 7px;
+          background: rgba(0,245,212,0.06);
+          border: 1px solid rgba(0,245,212,0.18);
+          border-radius: 99px; padding: 5px 13px;
+          flex-shrink: 0;
+        }
+        .ffit-score-dot {
+          width: 6px; height: 6px; border-radius: 50%;
+          background: #00f5d4; box-shadow: 0 0 8px #00f5d4;
+          animation: ffit-pulse 1.8s ease-in-out infinite;
+        }
+        .ffit-score-label {
+          font-family: 'JetBrains Mono', monospace; font-size: 10px;
+          color: rgba(0,245,212,0.5); letter-spacing: 1.5px;
+        }
+        .ffit-score-val {
+          font-family: 'JetBrains Mono', monospace; font-size: 16px;
+          font-weight: 700; color: #00f5d4;
+          text-shadow: 0 0 12px rgba(0,245,212,0.5);
+        }
+        @media (max-width: 480px) { .ffit-score-chip { display: none; } }
+
+        @keyframes ffit-pulse {
+          0%,100%{ box-shadow: 0 0 6px rgba(0,245,212,0.6); }
+          50%    { box-shadow: 0 0 14px rgba(0,245,212,1); }
+        }
+
+        /* top shimmer line */
+        .ffit-header::after {
+          content: '';
+          position: absolute; bottom: 0; left: 10%; right: 10%; height: 1px;
+          background: linear-gradient(90deg, transparent, rgba(0,245,212,0.25), transparent);
+          opacity: 0; transition: opacity 0.3s;
+        }
+        .ffit-header.scrolled::after { opacity: 1; }
+      `}</style>
+
+      {/* ── HEADER BAR ──────────────────────────────────────────────────── */}
+      <header className={`ffit-header ${scrolled ? "scrolled" : "top"}`}>
+        <div className="ffit-inner">
+
+          {/* LOGO */}
+          <div className="ffit-logo" onClick={() => navigate("/")}>
+            <div className="ffit-logo-icon">⚡</div>
+            <span className="ffit-logo-text">Forge<em>Fit</em></span>
           </div>
 
-          {/* Desktop Nav Links */}
-          <div className="hidden md:flex items-center gap-9">
-            {navLinks.map(({ label, ref }) => (
-              <span key={label} className="NAVLINK text-sm font-medium text-slate-500
-                hover:text-slate-100 cursor-pointer transition-colors duration-200"
-                onClick={() => scrollTo(ref)}>
-                {label}
-              </span>
+          {/* DESKTOP NAV LINKS */}
+          <nav className="ffit-nav">
+            {NAV_LINKS.map(link => (
+              <button
+                key={link.path}
+                className={`ffit-nav-link ${isActive(link.path) ? "active" : ""}`}
+                onClick={() => navigate(link.path)}
+              >
+                <span className="ffit-nav-icon">{link.icon}</span>
+                {link.label}
+              </button>
             ))}
-          </div>
+          </nav>
 
-          {/* Desktop Right */}
-          <div className="hidden md:flex items-center">
-            {user ? (
-              /* Desktop avatar + dropdown */
-              <div ref={dropdownRef} className="relative">
-                <button onClick={() => setDropdownOpen((o) => !o)}
-                  className="cursor-pointer focus:outline-none" aria-label="Profile menu">
-                  <UserAvatar user={user} />
-                </button>
+          {/* RIGHT: score chip + profile/auth + hamburger */}
+          <div className="ffit-right">
 
-                <div className={`absolute top-[calc(100%+12px)] right-0 w-52 rounded-2xl
-                  border border-white/8 overflow-hidden transition-all duration-200
-                  origin-top-right
-                  ${dropdownOpen
-                    ? "opacity-100 visible translate-y-0 scale-100"
-                    : "opacity-0 invisible -translate-y-2 scale-95"}`}
-                  style={{
-                    background: "rgba(6,6,18,0.97)",
-                    backdropFilter: "blur(24px)",
-                    boxShadow: "0 20px 60px rgba(0,0,0,0.6),0 0 0 1px rgba(99,102,241,0.08)",
-                  }}
-                >
-                  {/* User info */}
-                  <div className="px-4 py-3 border-b border-white/6">
-                    <p className="text-[13px] font-semibold text-slate-200 truncate">
-                      {user.name || "My Account"}
-                    </p>
-                    <p className="text-[11px] text-slate-500 truncate mt-0.5">{user.email}</p>
-                  </div>
-
-                  <div className="p-1.5">
-                    <button onClick={() => handleNav("/credits")}
-                      className="w-full flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl
-                        text-[13px] font-medium text-slate-400 hover:text-slate-100
-                        hover:bg-indigo-500/10 transition-all duration-150 cursor-pointer">
-                      <span className="text-base">⚡</span>
-                      <span>Credits</span>
-                      <span className="ml-auto text-[11px] font-semibold text-indigo-400
-                        bg-indigo-500/15 px-2 py-0.5 rounded-full">240</span>
-                    </button>
-
-                    <button onClick={() => handleNav("/history")}
-                      className="w-full flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl
-                        text-[13px] font-medium text-slate-400 hover:text-slate-100
-                        hover:bg-indigo-500/10 transition-all duration-150 cursor-pointer">
-                      <span className="text-base">🕐</span>
-                      <span>History</span>
-                    </button>
-
-                    <div className="my-1 h-px bg-white/6" />
-
-                    <button onClick={handleLogout}
-                      className="w-full flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl
-                        text-[13px] font-medium text-red-400 hover:text-red-300
-                        hover:bg-red-500/10 transition-all duration-150 cursor-pointer">
-                      <span className="text-base">→</span>
-                      <span>Log out</span>
-                    </button>
-                  </div>
-                </div>
-              </div>
-            ) : (
-              /* Desktop auth buttons */
-              <div id="NAVACCOUNT" className="flex items-center gap-2.5">
-                <button onClick={() => navigate("/logIn")}
-                  className="text-sm font-medium text-slate-500 hover:text-slate-100
-                    px-5 py-2.5 rounded-xl border border-white/10 hover:border-indigo-500/40
-                    hover:bg-indigo-500/8 transition-all duration-200 bg-transparent cursor-pointer">
-                  Sign in
-                </button>
-                <button onClick={() => navigate("/SignUp")}
-                  className="grad-bg text-sm font-semibold text-white px-6 py-2.5 rounded-xl
-                    border-none cursor-pointer transition-all duration-200 hover:-translate-y-0.5
-                    relative overflow-hidden"
-                  style={{ boxShadow: "0 4px 24px rgba(99,102,241,0.4)" }}>
-                  <span className="absolute inset-0 bg-linear-to-br from-white/18 to-transparent" />
-                  <span className="relative">Get Started Free</span>
-                </button>
+            {/* Today's Score chip — only when logged in */}
+            {user && (
+              <div className="ffit-score-chip">
+                <div className="ffit-score-dot" />
+                <span className="ffit-score-label">SCORE</span>
+                <span className="ffit-score-val">87</span>
               </div>
             )}
-          </div>
 
-          {/* Hamburger */}
-          <button
-            onClick={() => { setMenuOpen((o) => !o); setAccountOpen(false); }}
-            className="HAMBURGER md:hidden flex flex-col gap-[5px] p-2 border border-white/8
-              hover:border-indigo-500/40 rounded-lg transition-colors duration-200
-              bg-transparent cursor-pointer"
-            aria-label="Toggle menu"
-          >
-            <span className={`block w-5 h-[1.5px] bg-slate-500 rounded transition-all duration-300
-              ${menuOpen ? "translate-y-[6.5px] rotate-45 !bg-indigo-400" : ""}`} />
-            <span className={`block w-5 h-[1.5px] bg-slate-500 rounded transition-all duration-300
-              ${menuOpen ? "opacity-0 scale-x-0" : ""}`} />
-            <span className={`block w-5 h-[1.5px] bg-slate-500 rounded transition-all duration-300
-              ${menuOpen ? "-translate-y-[6.5px] -rotate-45 !bg-indigo-400" : ""}`} />
-          </button>
-        </div>
-      </nav>
+            {/* DESKTOP: profile dropdown OR auth buttons */}
+            <div style={{ position: "relative" }} ref={profileRef} className="desktop-only" >
+              <style>{`.desktop-only { display: none; } @media (min-width: 768px) { .desktop-only { display: block; } }`}</style>
 
-      {/* ── MOBILE MENU ───────────────────────────────────────────────── */}
-      <div
-        className={`fixed inset-x-0 top-[68px] z-40 md:hidden
-          bg-[#00000c]/97 backdrop-blur-3xl border-b border-white/6
-          transition-all duration-300 overflow-hidden
-          ${menuOpen
-            ? "max-h-screen opacity-100 pointer-events-auto"
-            : "max-h-0 opacity-0 pointer-events-none"}`}
-      >
-        <div className="px-6 pb-8 pt-2">
+              {user ? (
+                <>
+                  <button
+                    className="ffit-profile-btn"
+                    onClick={() => setProfileOpen(o => !o)}
+                    aria-label="Profile menu"
+                    aria-expanded={profileOpen}
+                  >
+                    <Avatar user={user} size={28} />
+                    <span className="ffit-profile-name">{user.name?.split(" ")[0] || "Account"}</span>
+                    <span className={`ffit-chevron ${profileOpen ? "open" : ""}`}>▾</span>
+                  </button>
 
-          {/* ── MY ACCOUNT accordion row (only when logged in) ── */}
-          {user && (
-            <div className="border-b border-white/5">
+                  {/* Dropdown */}
+                  <div className={`ffit-dropdown ${profileOpen ? "open" : "closed"}`}>
+                    {/* User info */}
+                    <div className="ffit-dd-header">
+                      <Avatar user={user} size={38} />
+                      <div>
+                        <div className="ffit-dd-name">{user.name || "My Account"}</div>
+                        <div className="ffit-dd-email">{user.email}</div>
+                      </div>
+                    </div>
 
-              {/* Tappable row */}
-              <button
-                onClick={() => setAccountOpen((o) => !o)}
-                className="w-full flex items-center justify-between py-4 bg-transparent cursor-pointer"
-              >
-                <div className="flex items-center gap-3">
-                  <UserAvatar user={user} size="w-[38px] h-[38px]" textSize="text-[15px]" />
-                  <div className="text-left">
-                    <p className="text-[15px] font-semibold text-slate-200">My Account</p>
-                    <p className="text-[11px] text-slate-500 mt-0.5 truncate max-w-[180px]">
-                      {user.email}
-                    </p>
+                    <div className="ffit-dd-body">
+                      <button className="ffit-dd-item" onClick={() => { setProfileOpen(false); navigate("/dashboard"); }}>
+                        <span className="ffit-dd-icon">⚡</span> Dashboard
+                      </button>
+                      <button className="ffit-dd-item" onClick={() => { setProfileOpen(false); navigate("/profile"); }}>
+                        <span className="ffit-dd-icon">◈</span> My Profile
+                      </button>
+                      <button className="ffit-dd-item" onClick={() => { setProfileOpen(false); navigate("/settings"); }}>
+                        <span className="ffit-dd-icon">⟡</span> Settings
+                      </button>
+                      <div className="ffit-dd-sep" />
+                      <button className="ffit-dd-item danger" onClick={handleLogout}>
+                        <span className="ffit-dd-icon">→</span> Log out
+                      </button>
+                    </div>
                   </div>
+                </>
+              ) : (
+                <div style={{ display: "flex", gap: 8 }}>
+                  <button className="ffit-btn-ghost" onClick={() => navigate("/login")}>Sign in</button>
+                  <button className="ffit-btn-primary" onClick={() => navigate("/signup")}>Get Started</button>
                 </div>
-                {/* Animated chevron */}
-                <span className={`text-slate-500 text-[11px] transition-transform duration-300
-                  ${accountOpen ? "rotate-180" : ""}`}>
-                  ▼
-                </span>
-              </button>
+              )}
+            </div>
 
-              {/* Slide-down sub-panel */}
-              <div
-                className={`overflow-hidden transition-all duration-300 ease-in-out
-                  ${accountOpen ? "max-h-60 mb-3" : "max-h-0"}`}
-                style={{ background: "rgba(99,102,241,0.04)", borderRadius: "0 0 12px 12px" }}
-              >
-                <button onClick={() => handleNav("/credits")}
-                  className="w-full flex items-center gap-3 px-4 py-3.5
-                    text-[14px] font-medium text-slate-400 hover:text-slate-100
-                    hover:bg-indigo-500/8 transition-all duration-150 cursor-pointer
-                    border-b border-white/4">
-                  <span className="text-base w-5 text-center">⚡</span>
-                  <span>Credits</span>
-                  <span className="ml-auto text-[11px] font-semibold text-indigo-400
-                    bg-indigo-500/15 px-2.5 py-0.5 rounded-full">240</span>
-                </button>
+            {/* HAMBURGER — mobile only */}
+            <button
+              className="ffit-hamburger"
+              onClick={() => setMobileOpen(o => !o)}
+              aria-label="Toggle menu"
+              aria-expanded={mobileOpen}
+            >
+              <span className={`ffit-bar ffit-bar1 ${mobileOpen ? "open" : ""}`} />
+              <span className={`ffit-bar ffit-bar2 ${mobileOpen ? "open" : ""}`} />
+              <span className={`ffit-bar ffit-bar3 ${mobileOpen ? "open" : ""}`} />
+            </button>
+          </div>
+        </div>
+      </header>
 
-                <button onClick={() => handleNav("/history")}
-                  className="w-full flex items-center gap-3 px-4 py-3.5
-                    text-[14px] font-medium text-slate-400 hover:text-slate-100
-                    hover:bg-indigo-500/8 transition-all duration-150 cursor-pointer
-                    border-b border-white/4">
-                  <span className="text-base w-5 text-center">🕐</span>
-                  <span>History</span>
-                </button>
+      {/* ── MOBILE MENU ─────────────────────────────────────────────────── */}
+      <div className={`ffit-mobile ${mobileOpen ? "open" : "closed"}`} aria-hidden={!mobileOpen}>
+        <div className="ffit-mobile-inner">
 
-                <button onClick={handleLogout}
-                  className="w-full flex items-center gap-3 px-4 py-3.5
-                    text-[14px] font-medium text-red-400 hover:text-red-300
-                    hover:bg-red-500/8 transition-all duration-150 cursor-pointer">
-                  <span className="text-base w-5 text-center">→</span>
-                  <span>Log out</span>
-                </button>
+          {/* User info row */}
+          {user && (
+            <div className="ffit-mob-user">
+              <Avatar user={user} size={44} />
+              <div className="ffit-mob-user-info">
+                <div className="ffit-mob-name">{user.name || "My Account"}</div>
+                <div className="ffit-mob-email">{user.email}</div>
               </div>
             </div>
           )}
 
-          {/* ── Nav links (always visible) ── */}
-          {navLinks.map(({ label, ref }) => (
-            <span key={label} onClick={() => scrollTo(ref)}
-              className="block text-[15px] font-medium text-slate-500 hover:text-slate-100
-                py-4 border-b border-white/5 last:border-none
-                cursor-pointer transition-colors duration-200">
-              {label}
-            </span>
+          {/* Nav links */}
+          {NAV_LINKS.map(link => (
+            <div
+              key={link.path}
+              className={`ffit-mob-link ${isActive(link.path) ? "active" : ""}`}
+              onClick={() => navigate(link.path)}
+            >
+              <div className="ffit-mob-icon">{link.icon}</div>
+              {link.label}
+            </div>
           ))}
 
-          {/* ── Auth buttons (only when logged out) ── */}
+          {/* Account actions (logged in) */}
+          {user && (
+            <div className="ffit-mob-actions">
+              <button className="ffit-mob-action" onClick={() => navigate("/dashboard")}>
+                <span>⚡</span> Dashboard
+              </button>
+              <button className="ffit-mob-action" onClick={() => navigate("/profile")}>
+                <span>◈</span> My Profile
+              </button>
+              <button className="ffit-mob-action" onClick={() => navigate("/settings")}>
+                <span>⟡</span> Settings
+              </button>
+              <button className="ffit-mob-action danger" onClick={handleLogout}>
+                <span>→</span> Log out
+              </button>
+            </div>
+          )}
+
+          {/* Auth buttons (logged out) */}
           {!user && (
-            <div className="flex flex-col gap-3 pt-6">
-              <button onClick={() => handleNav("/logIn")}
-                className="w-full text-[15px] font-medium text-slate-400 py-3.5 rounded-xl
-                  border border-white/10 bg-transparent cursor-pointer
-                  hover:text-slate-200 hover:border-indigo-500/30 transition-all duration-200">
-                Sign in
-              </button>
-              <button onClick={() => handleNav("/SignUp")}
-                className="grad-bg w-full text-[15px] font-semibold text-white py-3.5
-                  rounded-xl border-none cursor-pointer relative overflow-hidden"
-                style={{ boxShadow: "0 4px 24px rgba(99,102,241,0.4)" }}>
-                <span className="absolute inset-0 bg-linear-to-br from-white/18 to-transparent" />
-                <span className="relative">Get Started Free</span>
-              </button>
+            <div className="ffit-mob-auth">
+              <button className="ffit-mob-auth-ghost" onClick={() => navigate("/login")}>Sign in</button>
+              <button className="ffit-mob-auth-primary" onClick={() => navigate("/signup")}>Get Started Free</button>
             </div>
           )}
         </div>

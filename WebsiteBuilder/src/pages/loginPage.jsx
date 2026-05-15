@@ -11,7 +11,7 @@ export function LoginPage() {
   const [scrolled, setScrolled]   = useState(false);
   const [loginError, setLoginError] = useState("");
   const [menuOpen, setMenuOpen]   = useState(false);
-  const {setUser} = useAuth();
+  const {user, setUser} = useAuth();
   useEffect(() => {
     const fn = () => setScrolled(window.scrollY > 20);
     window.addEventListener("scroll", fn);
@@ -62,7 +62,12 @@ export function LoginPage() {
       setTimeout(() => {
 
         setLoading(false);
+        if(user.onboardingCompleted){
         window.location.href = "/";
+        }
+        else{
+        window.location.href = "/onboarding";
+        }
 
       }, 1800);
 

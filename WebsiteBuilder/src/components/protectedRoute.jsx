@@ -1,23 +1,21 @@
-import { useEffect, useState } from "react";
-import api from "../utils/axios";
 import { Navigate } from "react-router-dom";
-
+import { useAuth } from "../context/AuthContext";
 
 function ProtectedRoute({children}){
-   const [IsAuth, SetAuth] = useState(null);
+   const { user, loading } = useAuth();
 
-   useEffect(()=>{
+   if(loading) return (
+      <div style={{
+         minHeight:"100vh", background:"#00000a",
+         display:"flex", alignItems:"center", justifyContent:"center",
+         fontFamily:"'JetBrains Mono',monospace", fontSize:13,
+         color:"rgba(0,245,212,0.6)", letterSpacing:2
+      }}>
+         SYNCING...
+      </div>
+   );
 
-            api.get("auth/me").then(()=>{
-                SetAuth(true);
-            }).catch(()=>{
-                SetAuth(false);
-            })
-   },[]);
-
-    if(IsAuth==null) return <h1>Loading....</h1>
-
-    return IsAuth ? children : <Navigate to={"/logIn"}/>
+   return user ? children : <Navigate to={"/logIn"}/>;
 }
 
 export default ProtectedRoute;

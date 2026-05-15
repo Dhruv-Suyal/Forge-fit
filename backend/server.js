@@ -6,6 +6,7 @@ const connectDB = require('./utils/dbConnection');
 const passport = require('passport');
 require('./utils/passport');
 const authRoute = require('./routes/auth');
+const homeRoute = require('./routes/home');
 connectDB();
 const app = express();
 
@@ -18,6 +19,7 @@ app.use(express.json());
 app.use(cookieParser());
 app.use(passport.initialize());
 app.use('/api/auth', authRoute);
+app.use('/api/home', homeRoute);
 
 const PORT = process.env.PORT || 5000;
 

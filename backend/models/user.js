@@ -18,7 +18,26 @@ const userSchema = new mongoose.Schema({
     },
     avatar:{
         type:String
+    },
+    xp: {
+        type: Number,
+        default: 0
+    },
+
+    level: {
+        type: String,
+        default: "Beginner"
+    },
+
+    streak: {
+        type: Number,
+        default: 0
+    },
+    onboardingCompleted:{
+        type:Boolean,
+        default:false
     }
+    
 }, 
 {timestamps:true});
 

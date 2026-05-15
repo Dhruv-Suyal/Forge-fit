@@ -5,7 +5,7 @@ import { useAuth } from "../context/AuthContext";
 
 export function SignUp() {
   const navigate = useNavigate();
-  const {setUser} = useAuth();
+  const {user, setUser} = useAuth();
   
   const [form, setForm] = useState({ name: "", email: "", password: "", confirm: "" });
   const [errors, setErrors] = useState({});
@@ -64,7 +64,13 @@ export function SignUp() {
         password: form.password
       });
       setUser(res.data.user);
-      navigate("/");
+      if(user.onboardingCompleted){
+        navigate("/");
+      }
+      else{
+        navigate("/onboarding");
+      }
+      
     } catch (err) {
       setErrors({
         backend:
