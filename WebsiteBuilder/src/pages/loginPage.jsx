@@ -58,17 +58,15 @@ export function LoginPage() {
         email: form.email,
         password: form.password
       });
-      setUser(res.data.user);
+      const loggedInUser = res.data.user;
+      setUser(loggedInUser);
       setTimeout(() => {
-
         setLoading(false);
-        if(user.onboardingCompleted){
-        window.location.href = "/";
+        if (loggedInUser?.onboardingCompleted) {
+          window.location.href = "/";
+        } else {
+          window.location.href = "/onboarding";
         }
-        else{
-        window.location.href = "/onboarding";
-        }
-
       }, 1800);
 
     } catch (err) {

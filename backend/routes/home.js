@@ -3,7 +3,7 @@ const router        = express.Router();
 const authMiddleware = require('../utils/authMiddleware');
 const TodayTask     = require('../models/TodayTask');
 const WellnessLog   = require('../models/WellnessLog');
-const { default: Profile } = require('../models/Profile');
+const Profile = require('../models/Profile');
 
 const getToday = () => new Date().toISOString().split('T')[0]; // "YYYY-MM-DD"
 

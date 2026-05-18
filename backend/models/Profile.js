@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+const mongoose = require("mongoose");
 
 const profileSchema = new mongoose.Schema({
 
@@ -32,7 +32,8 @@ const profileSchema = new mongoose.Schema({
       lat:Number,
       lon:Number
    },
-    wakeUpTime: {
+
+   wakeUpTime: {
       type: String,
       default: "06:00 AM"
    },
@@ -66,9 +67,57 @@ const profileSchema = new mongoose.Schema({
       default: [
          "Late Night Scrolling"
       ]
+   },
+
+   exercises: [
+   {
+      title: {
+         type: String,
+         required: true
+      },
+
+      goal: String,
+
+      category: {
+         type: String,
+         enum: [
+            "strength",
+            "skill",
+            "cardio",
+            "mobility",
+            "muscle-building"
+         ]
+      },
+
+      difficulty: {
+         type: String,
+         enum: ["beginner", "intermediate", "advanced"],
+         default: "beginner"
+      },
+
+      sets: Number,
+
+      reps: Number,
+
+      duration: Number,
+
+      preferredTime: {
+         type: String,
+         default: "06:00 PM"
+      },
+
+      image: String,
+
+      video: String,
+
+      isActive: {
+         type: Boolean,
+         default: true
+      }
    }
+]
 
 
 },{timestamps:true});
 
-export default mongoose.model("Profile", profileSchema);
+module.exports = mongoose.model("Profile", profileSchema);

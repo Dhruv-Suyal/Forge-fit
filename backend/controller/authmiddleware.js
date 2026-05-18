@@ -1,9 +1,9 @@
 const bcrypt = require('bcryptjs');
 const jwt =  require('jsonwebtoken');
-const { default: User } = require('../models/User');
-const { default: Profile } = require('../models/Profile');
+const User    = require('../models/User');
+const Profile = require('../models/Profile');
 const TodayTask = require('../models/TodayTask');
-const generateTasksWithAI = require('../services/TodayTaskGenerate');
+const { generateTasksWithAI } = require('../services/aiCAll');
 
 exports.postSignUp = async (req, res)=>{
     try{

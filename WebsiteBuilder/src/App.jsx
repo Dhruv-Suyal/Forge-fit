@@ -6,6 +6,7 @@ import "./App.css"
 import ProtectedRoute from "./components/protectedRoute";
 import { useAuth } from "./context/AuthContext";
 import { Onboarding } from "./pages/Onboarding";
+import { ExercisePage } from "./pages/Exercise/ExercisePage";
 
 export function App(){
 
@@ -20,7 +21,7 @@ export function App(){
         <Route path="/onboarding" element={<ProtectedRoute>
           <Onboarding/>
         </ProtectedRoute>}/>
-
+        <Route path="/exercise" element={<ProtectedRoute><ExercisePage/></ProtectedRoute>}/>
     </Routes>
   </BrowserRouter>
   </>
