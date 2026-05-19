@@ -9,18 +9,18 @@ import { Header } from "../../components/header";
 // TICKER — static motivational feed
 // ══════════════════════════════════════════════════════════════════════════════
 const TICKER_ITEMS = [
-  { type: "quote",   text: "Discipline is the bridge between goals and accomplishment. — Jim Rohn" },
+  { type: "quote", text: "Discipline is the bridge between goals and accomplishment. — Jim Rohn" },
   { type: "weather", text: "🌤 Stay hydrated · Drink water every hour for peak performance" },
-  { type: "news",    text: "📰 WHO: 7-9 hrs sleep is key to metabolic health in adults" },
-  { type: "alert",   text: "⚡ ForgeFit AI · Your personalised tasks are ready for today" },
-  { type: "quote",   text: "The body achieves what the mind believes." },
-  { type: "news",    text: "📰 Study: 10-min cold exposure boosts dopamine by 250% — Nature, 2025" },
-  { type: "quote",   text: "You don't rise to the level of your goals, you fall to the level of your systems." },
+  { type: "news", text: "📰 WHO: 7-9 hrs sleep is key to metabolic health in adults" },
+  { type: "alert", text: "⚡ ForgeFit AI · Your personalised tasks are ready for today" },
+  { type: "quote", text: "The body achieves what the mind believes." },
+  { type: "news", text: "📰 Study: 10-min cold exposure boosts dopamine by 250% — Nature, 2025" },
+  { type: "quote", text: "You don't rise to the level of your goals, you fall to the level of your systems." },
 ];
 
 // Category → icon
-const CAT_ICON = { workout:"⚡", exercise:"⚡", fitness:"⚡", nutrition:"⟡", food:"⟡", meal:"⟡", mindfulness:"◎", meditation:"◎", sleep:"◎", rest:"◎", learning:"◈", reading:"◈", hydration:"💧" };
-function catIcon(cat) { if (!cat) return "✦"; const k = cat.toLowerCase(); for (const [key,v] of Object.entries(CAT_ICON)) { if (k.includes(key)) return v; } return "✦"; }
+const CAT_ICON = { workout: "⚡", exercise: "⚡", fitness: "⚡", nutrition: "⟡", food: "⟡", meal: "⟡", mindfulness: "◎", meditation: "◎", sleep: "◎", rest: "◎", learning: "◈", reading: "◈", hydration: "💧" };
+function catIcon(cat) { if (!cat) return "✦"; const k = cat.toLowerCase(); for (const [key, v] of Object.entries(CAT_ICON)) { if (k.includes(key)) return v; } return "✦"; }
 
 // Convert "10:00 PM" → "22:00"
 function to24h(str) {
@@ -29,23 +29,23 @@ function to24h(str) {
   let [h, m] = time.split(':').map(Number);
   if (mer === 'PM' && h !== 12) h += 12;
   if (mer === 'AM' && h === 12) h = 0;
-  return `${String(h).padStart(2,'0')}:${String(m||0).padStart(2,'0')}`;
+  return `${String(h).padStart(2, '0')}:${String(m || 0).padStart(2, '0')}`;
 }
 
 // Transform TodayTask docs → activity row shape
 function transformTasks(tasks) {
-  const now  = new Date();
+  const now = new Date();
   const nowM = now.getHours() * 60 + now.getMinutes();
   return tasks.map(t => {
     const tMins = timeToMins(t.scheduledTime || '00:00');
-    const diff  = tMins - nowM;
+    const diff = tMins - nowM;
     const status = t.completed ? 'done' : diff > 30 ? 'upcoming' : diff >= -30 ? 'active' : 'upcoming';
     return {
-      id:         t._id,
-      time:       t.scheduledTime || '--:--',
-      label:      t.title,
-      duration:   t.duration ? `${t.duration} min` : '--',
-      icon:       catIcon(t.category),
+      id: t._id,
+      time: t.scheduledTime || '--:--',
+      label: t.title,
+      duration: t.duration ? `${t.duration} min` : '--',
+      icon: catIcon(t.category),
       status,
       scoreDelta: t.xpReward || 10,
     };
@@ -64,9 +64,9 @@ function timeToMins(str) {
   return h * 60 + m;
 }
 function minsUntil(timeStr) {
-  const now  = new Date();
+  const now = new Date();
   const nowM = now.getHours() * 60 + now.getMinutes();
-  const tgt  = timeToMins(timeStr);
+  const tgt = timeToMins(timeStr);
   return tgt - nowM;
 }
 function fmtCountdown(mins) {
@@ -77,7 +77,7 @@ function fmtCountdown(mins) {
 
 // ─── score ring ───────────────────────────────────────────────────────────────
 function ScoreRing({ score = 87, size = 150, stroke = 9 }) {
-  const r    = (size - stroke) / 2;
+  const r = (size - stroke) / 2;
   const circ = 2 * Math.PI * r;
   const [prog, setProg] = useState(0);
   useEffect(() => { const t = setTimeout(() => setProg(score), 400); return () => clearTimeout(t); }, [score]);
@@ -85,8 +85,8 @@ function ScoreRing({ score = 87, size = 150, stroke = 9 }) {
   return (
     <div style={{ position: "relative", width: size, height: size }}>
       <svg width={size} height={size} style={{ transform: "rotate(-90deg)" }}>
-        <circle cx={size/2} cy={size/2} r={r} fill="none" stroke="rgba(255,255,255,0.05)" strokeWidth={stroke} />
-        <circle cx={size/2} cy={size/2} r={r} fill="none" stroke={color} strokeWidth={stroke}
+        <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="rgba(255,255,255,0.05)" strokeWidth={stroke} />
+        <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke={color} strokeWidth={stroke}
           strokeDasharray={circ} strokeLinecap="round"
           strokeDashoffset={circ - (circ * prog / 100)}
           style={{ transition: "stroke-dashoffset 1.4s cubic-bezier(.22,1,.36,1)", filter: `drop-shadow(0 0 8px ${color})` }} />
@@ -142,9 +142,9 @@ function ActivityPanel({ activities, onMarkDone }) {
       <div style={{ flex: 1, overflowY: "auto", paddingRight: 2 }} className="fp-scroll">
         {activities.map((act, i) => {
           const isActive = act.status === "active";
-          const isDone   = act.status === "done";
+          const isDone = act.status === "done";
           const isMissed = act.status === "missed";
-          const isUp     = act.status === "upcoming";
+          const isUp = act.status === "upcoming";
           const accentColor = isDone ? "#00f5d4" : isActive ? "#f59e0b" : isMissed ? "#ef4444" : "rgba(255,255,255,0.18)";
 
           return (
@@ -153,15 +153,15 @@ function ActivityPanel({ activities, onMarkDone }) {
                 <div className="fp-timeline-line" style={{ background: isDone ? "rgba(0,245,212,0.2)" : "rgba(255,255,255,0.05)" }} />
               )}
               <div className="fp-act-dot" style={{
-                background:  isDone ? "#00f5d4" : isActive ? "#f59e0b" : "rgba(255,255,255,0.06)",
-                border:      `1.5px solid ${accentColor}`,
-                boxShadow:   (isDone || isActive) ? `0 0 10px ${accentColor}` : "none",
+                background: isDone ? "#00f5d4" : isActive ? "#f59e0b" : "rgba(255,255,255,0.06)",
+                border: `1.5px solid ${accentColor}`,
+                boxShadow: (isDone || isActive) ? `0 0 10px ${accentColor}` : "none",
               }} />
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 3 }}>
                   <span style={{ fontFamily: "var(--ff-mono)", fontSize: 10, color: accentColor, letterSpacing: 1 }}>{act.time}</span>
-                  {isDone   && <span style={{ fontFamily: "var(--ff-mono)", fontSize: 9, color: "#00f5d4", background: "rgba(0,245,212,0.1)",   borderRadius: 4, padding: "1px 6px" }}>+{act.scoreDelta} pts</span>}
-                  {isMissed && <span style={{ fontFamily: "var(--ff-mono)", fontSize: 9, color: "#ef4444", background: "rgba(239,68,68,0.1)",    borderRadius: 4, padding: "1px 6px" }}>−{act.scoreDelta} pts</span>}
+                  {isDone && <span style={{ fontFamily: "var(--ff-mono)", fontSize: 9, color: "#00f5d4", background: "rgba(0,245,212,0.1)", borderRadius: 4, padding: "1px 6px" }}>+{act.scoreDelta} pts</span>}
+                  {isMissed && <span style={{ fontFamily: "var(--ff-mono)", fontSize: 9, color: "#ef4444", background: "rgba(239,68,68,0.1)", borderRadius: 4, padding: "1px 6px" }}>−{act.scoreDelta} pts</span>}
                 </div>
                 <div style={{ display: "flex", alignItems: "center", gap: 7, marginBottom: 4 }}>
                   <span style={{ fontSize: 13, opacity: isDone ? 0.5 : 1 }}>{act.icon}</span>
@@ -170,8 +170,8 @@ function ActivityPanel({ activities, onMarkDone }) {
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
                   <span style={{ fontFamily: "var(--ff-mono)", fontSize: 10, color: "rgba(255,255,255,0.2)" }}>{act.duration}</span>
                   {(isActive || isUp) && <button className="fp-done-btn" onClick={() => onMarkDone(act.id)}>✓ Done</button>}
-                  {isDone   && <span style={{ fontFamily: "var(--ff-mono)", fontSize: 9, color: "rgba(0,245,212,0.4)" }}>Completed</span>}
-                  {isMissed && <span style={{ fontFamily: "var(--ff-mono)", fontSize: 9, color: "rgba(239,68,68,0.4)"  }}>Missed</span>}
+                  {isDone && <span style={{ fontFamily: "var(--ff-mono)", fontSize: 9, color: "rgba(0,245,212,0.4)" }}>Completed</span>}
+                  {isMissed && <span style={{ fontFamily: "var(--ff-mono)", fontSize: 9, color: "rgba(239,68,68,0.4)" }}>Missed</span>}
                 </div>
               </div>
             </div>
@@ -186,13 +186,13 @@ function ActivityPanel({ activities, onMarkDone }) {
 // CENTER: SCORES + SLEEP (side by side)
 // ══════════════════════════════════════════════════════════════════════════════
 function CenterPanel({ user, activities, sleep }) {
-  const clock   = useClock();
-  const done    = activities.filter(a => a.status === "done").length;
-  const total   = activities.length;
+  const clock = useClock();
+  const done = activities.filter(a => a.status === "done").length;
+  const total = activities.length;
   const timeStr = `${pad(clock.getHours())}:${pad(clock.getMinutes())}:${pad(clock.getSeconds())}`;
   const dateStr = clock.toLocaleDateString("en-IN", { weekday: "long", day: "numeric", month: "short" });
 
-  const weekDays   = ["M","T","W","T","F","S","S"];
+  const weekDays = ["M", "T", "W", "T", "F", "S", "S"];
   const weekScores = [62, 78, 85, 70, 91, 88, user.todayScore];
   const sleepCountdown = minsUntil(sleep.bedtime);
 
@@ -215,7 +215,7 @@ function CenterPanel({ user, activities, sleep }) {
           <div style={{ display: "flex", gap: 7, marginTop: 14 }}>
             {[
               ["Streak", `${user.streak}d`, "#f59e0b"],
-              ["Tasks",  `${done}/${total}`, "#00f5d4"],
+              ["Tasks", `${done}/${total}`, "#00f5d4"],
               ["Weekly", `${user.weekScore}`, "#7c3aed"],
             ].map(([l, v, c]) => (
               <div key={l} style={{ textAlign: "center", padding: "9px 6px", background: "rgba(255,255,255,0.03)", borderRadius: 10, border: "1px solid rgba(255,255,255,0.05)", minWidth: 52 }}>
@@ -233,8 +233,8 @@ function CenterPanel({ user, activities, sleep }) {
         <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center", gap: 10, paddingLeft: 16 }}>
           <div style={{ fontFamily: "var(--ff-mono)", fontSize: 9, letterSpacing: 2, color: "rgba(0,245,212,0.45)", textTransform: "uppercase", marginBottom: 2 }}>Sleep Schedule</div>
           {[
-            { label: "SLEEP AT", time: sleep.bedtime,  color: "#7c3aed", icon: "🌙" },
-            { label: "WAKE UP",  time: sleep.wakeTime, color: "#f59e0b", icon: "☀️" },
+            { label: "SLEEP AT", time: sleep.bedtime, color: "#7c3aed", icon: "🌙" },
+            { label: "WAKE UP", time: sleep.wakeTime, color: "#f59e0b", icon: "☀️" },
           ].map(s => (
             <div key={s.label} style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 12px", borderRadius: 11, background: "rgba(255,255,255,0.02)", border: `1px solid ${s.color}22` }}>
               <span style={{ fontSize: 20 }}>{s.icon}</span>
@@ -260,9 +260,9 @@ function CenterPanel({ user, activities, sleep }) {
         <SectionLabel>This Week</SectionLabel>
         <div style={{ display: "flex", gap: 6, alignItems: "flex-end", height: 60, marginTop: 6 }}>
           {weekDays.map((d, i) => {
-            const s       = weekScores[i];
+            const s = weekScores[i];
             const isToday = i === 6;
-            const col     = s >= 80 ? "#00f5d4" : s >= 60 ? "#f59e0b" : "#ef4444";
+            const col = s >= 80 ? "#00f5d4" : s >= 60 ? "#f59e0b" : "#ef4444";
             return (
               <div key={`${d}-${i}`} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 4 }}>
                 <div style={{ width: "100%", background: isToday ? col : `${col}55`, borderRadius: "4px 4px 0 0", height: `${(s / 100) * 50}px`, boxShadow: isToday ? `0 0 8px ${col}` : "none", transition: "height 1s ease", minHeight: 4, position: "relative" }}>
@@ -303,7 +303,7 @@ function CenterPanel({ user, activities, sleep }) {
 // ══════════════════════════════════════════════════════════════════════════════
 function WellnessPanel({ water, food, screenTime, onWaterTap, onFoodDone, onScreenTimeUpdate }) {
   const [editScreen, setEditScreen] = useState(null);
-  const [editVal,    setEditVal]    = useState("");
+  const [editVal, setEditVal] = useState("");
 
   return (
     // No overflow here — the parent column div owns the scroll
@@ -381,7 +381,7 @@ function WellnessPanel({ water, food, screenTime, onWaterTap, onFoodDone, onScre
       <Panel>
         <SectionLabel>Screen Time Limits</SectionLabel>
         {screenTime.map(app => {
-          const pct  = Math.min((app.used / app.limit) * 100, 100);
+          const pct = Math.min((app.used / app.limit) * 100, 100);
           const over = app.used >= app.limit;
           return (
             <div key={app.id} style={{ marginBottom: 12 }}>
@@ -424,7 +424,7 @@ function WellnessPanel({ water, food, screenTime, onWaterTap, onFoodDone, onScre
 // BOTTOM TICKER
 // ══════════════════════════════════════════════════════════════════════════════
 function Ticker({ items }) {
-  const TYPE_COLOR  = { quote: "#00f5d4", weather: "#0ea5e9", news: "rgba(255,255,255,0.5)", alert: "#f59e0b" };
+  const TYPE_COLOR = { quote: "#00f5d4", weather: "#0ea5e9", news: "rgba(255,255,255,0.5)", alert: "#f59e0b" };
   const TYPE_PREFIX = { quote: "◈ THOUGHT", weather: "⟡ WEATHER", news: "✦ NEWS", alert: "⚠ ALERT" };
   return (
     <div style={{ height: 40, background: "rgba(0,0,14,0.95)", borderTop: "1px solid rgba(0,245,212,0.1)", backdropFilter: "blur(20px)", display: "flex", alignItems: "center", overflow: "hidden", flexShrink: 0 }}>
@@ -451,9 +451,9 @@ function Ticker({ items }) {
 // ══════════════════════════════════════════════════════════════════════════════
 function LoadingScreen() {
   return (
-    <div style={{ minHeight:"100vh", background:"#00000e", display:"flex", alignItems:"center", justifyContent:"center", flexDirection:"column", gap:20 }}>
-      <div style={{ width:56, height:56, borderRadius:"50%", border:"3px solid rgba(0,245,212,0.15)", borderTopColor:"#00f5d4", animation:"fp-spin 0.9s linear infinite" }} />
-      <span style={{ fontFamily:"'JetBrains Mono',monospace", fontSize:11, color:"rgba(0,245,212,0.5)", letterSpacing:3 }}>LOADING YOUR DAY</span>
+    <div style={{ minHeight: "100vh", background: "#00000e", display: "flex", alignItems: "center", justifyContent: "center", flexDirection: "column", gap: 20 }}>
+      <div style={{ width: 56, height: 56, borderRadius: "50%", border: "3px solid rgba(0,245,212,0.15)", borderTopColor: "#00f5d4", animation: "fp-spin 0.9s linear infinite" }} />
+      <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 11, color: "rgba(0,245,212,0.5)", letterSpacing: 3 }}>LOADING YOUR DAY</span>
       <style>{"@keyframes fp-spin{to{transform:rotate(360deg)}}"}</style>
     </div>
   );
@@ -465,21 +465,21 @@ function LoadingScreen() {
 export function Home() {
   const { user: authUser, profile } = useAuth();
 
-  const [rawTasks,     setRawTasks]     = useState([]);
-  const [wellness,     setWellness]     = useState(null);
-  const [weeklyScores, setWeeklyScores] = useState([0,0,0,0,0,0,0]);
-  const [loading,      setLoading]      = useState(true);
-  const [error,        setError]        = useState(null);
+  const [rawTasks, setRawTasks] = useState([]);
+  const [wellness, setWellness] = useState(null);
+  const [weeklyScores, setWeeklyScores] = useState([0, 0, 0, 0, 0, 0, 0]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   const containerRef = useRef(null);
-  const tickerRef    = useRef(null);
+  const tickerRef = useRef(null);
 
   useEffect(() => {
     api.get('/home/today')
       .then(res => {
         setRawTasks(res.data.tasks || []);
         setWellness(res.data.wellness || null);
-        setWeeklyScores(res.data.weeklyScores || [0,0,0,0,0,0,0]);
+        setWeeklyScores(res.data.weeklyScores || [0, 0, 0, 0, 0, 0, 0]);
       })
       .catch(err => setError(err.message))
       .finally(() => setLoading(false));
@@ -488,43 +488,43 @@ export function Home() {
   useGSAP(() => {
     if (loading || !containerRef.current) return;
     const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
-    tl.from(".fp-grid-bg",      { opacity:0, duration:0.8 }, 0)
-      .from(".fp-glow-l",       { opacity:0, x:-80, duration:1.2 }, 0)
-      .from(".fp-glow-r",       { opacity:0, x:80,  duration:1.2 }, 0)
-      .from(".fp-activity-row", { opacity:0, x:-28, duration:0.45, stagger:0.045 }, 0.15)
-      .from(".fp-center-panel", { opacity:0, y:22,  scale:0.96, duration:0.5, stagger:0.1 }, 0.1)
-      .from(".fp-right-panel",  { opacity:0, x:28,  duration:0.45, stagger:0.09 }, 0.25)
-      .from(tickerRef.current,  { opacity:0, y:18,  duration:0.5 }, 0.55);
+    tl.from(".fp-grid-bg", { opacity: 0, duration: 0.8 }, 0)
+      .from(".fp-glow-l", { opacity: 0, x: -80, duration: 1.2 }, 0)
+      .from(".fp-glow-r", { opacity: 0, x: 80, duration: 1.2 }, 0)
+      .from(".fp-activity-row", { opacity: 0, x: -28, duration: 0.45, stagger: 0.045 }, 0.15)
+      .from(".fp-center-panel", { opacity: 0, y: 22, scale: 0.96, duration: 0.5, stagger: 0.1 }, 0.1)
+      .from(".fp-right-panel", { opacity: 0, x: 28, duration: 0.45, stagger: 0.09 }, 0.25)
+      .from(tickerRef.current, { opacity: 0, y: 18, duration: 0.5 }, 0.55);
   }, { scope: containerRef, dependencies: [loading] });
 
   // ── derived values ──────────────────────────────────────────────────────────
-  const activities  = transformTasks(rawTasks);
-  const completedXP = rawTasks.filter(t => t.completed).reduce((s,t) => s + (t.xpReward||0), 0);
-  const totalXP     = rawTasks.reduce((s,t) => s + (t.xpReward||0), 0);
-  const todayScore  = totalXP > 0 ? Math.round((completedXP / totalXP) * 100) : 0;
+  const activities = transformTasks(rawTasks);
+  const completedXP = rawTasks.filter(t => t.completed).reduce((s, t) => s + (t.xpReward || 0), 0);
+  const totalXP = rawTasks.reduce((s, t) => s + (t.xpReward || 0), 0);
+  const todayScore = totalXP > 0 ? Math.round((completedXP / totalXP) * 100) : 0;
 
   const userData = {
-    name:      profile?.displayName || authUser?.name || "Athlete",
+    name: profile?.displayName || authUser?.name || "Athlete",
     todayScore,
     weekScore: weeklyScores[weeklyScores.length - 1] || 0,
-    streak:    12,
+    streak: 12,
   };
 
-  const water      = wellness?.water      || { target:8, consumed:0, glassML:250 };
-  const food       = wellness?.food       || [];
+  const water = wellness?.water || { target: 8, consumed: 0, glassML: 250 };
+  const food = wellness?.food || [];
   const screenTime = wellness?.screenTime || [];
   const sleep = {
-    bedtime:     to24h(profile?.sleepTime  || "10:00 PM"),
-    wakeTime:    to24h(profile?.wakeUpTime || "06:00 AM"),
+    bedtime: to24h(profile?.sleepTime || "10:00 PM"),
+    wakeTime: to24h(profile?.wakeUpTime || "06:00 AM"),
     hoursTarget: 7.5,
     hoursActual: null,
   };
 
   // ── handlers ────────────────────────────────────────────────────────────────
   const handleMarkDone = useCallback(async (id) => {
-    setRawTasks(prev => prev.map(t => t._id === id ? { ...t, completed:true } : t));
+    setRawTasks(prev => prev.map(t => t._id === id ? { ...t, completed: true } : t));
     try { await api.patch(`/home/tasks/${id}/done`); }
-    catch { setRawTasks(prev => prev.map(t => t._id === id ? { ...t, completed:false } : t)); }
+    catch { setRawTasks(prev => prev.map(t => t._id === id ? { ...t, completed: false } : t)); }
   }, []);
 
   const handleWaterTap = useCallback(async (slot) => {
@@ -535,24 +535,24 @@ export function Home() {
   }, [water]);
 
   const handleFoodDone = useCallback(async (id) => {
-    setWellness(prev => ({ ...prev, food: prev.food.map(f => f.id === id ? { ...f, done:!f.done } : f) }));
+    setWellness(prev => ({ ...prev, food: prev.food.map(f => f.id === id ? { ...f, done: !f.done } : f) }));
     try { await api.patch(`/home/wellness/food/${id}`); }
-    catch { setWellness(prev => ({ ...prev, food: prev.food.map(f => f.id === id ? { ...f, done:!f.done } : f) })); }
+    catch { setWellness(prev => ({ ...prev, food: prev.food.map(f => f.id === id ? { ...f, done: !f.done } : f) })); }
   }, []);
 
   const handleScreenTimeUpdate = useCallback(async (id, minutes) => {
-    setWellness(prev => ({ ...prev, screenTime: prev.screenTime.map(s => s.id === id ? { ...s, used:minutes } : s) }));
+    setWellness(prev => ({ ...prev, screenTime: prev.screenTime.map(s => s.id === id ? { ...s, used: minutes } : s) }));
     try { await api.patch('/home/wellness/screentime', { id, minutes }); }
-    catch {}
+    catch { }
   }, []);
 
   if (loading) return <LoadingScreen />;
   if (error) return (
-    <div style={{ minHeight:"100vh", background:"#00000e", display:"flex", alignItems:"center", justifyContent:"center" }}>
-      <div style={{ fontFamily:"'JetBrains Mono',monospace", color:"#ef4444", textAlign:"center" }}>
-        <div style={{ fontSize:24, marginBottom:8 }}>⚠</div>
-        <div style={{ fontSize:13 }}>{error}</div>
-        <button onClick={() => window.location.reload()} style={{ marginTop:16, padding:"8px 18px", borderRadius:8, background:"rgba(0,245,212,0.1)", border:"1px solid rgba(0,245,212,0.3)", color:"#00f5d4", cursor:"pointer", fontFamily:"inherit" }}>Retry</button>
+    <div style={{ minHeight: "100vh", background: "#00000e", display: "flex", alignItems: "center", justifyContent: "center" }}>
+      <div style={{ fontFamily: "'JetBrains Mono',monospace", color: "#ef4444", textAlign: "center" }}>
+        <div style={{ fontSize: 24, marginBottom: 8 }}>⚠</div>
+        <div style={{ fontSize: 13 }}>{error}</div>
+        <button onClick={() => window.location.reload()} style={{ marginTop: 16, padding: "8px 18px", borderRadius: 8, background: "rgba(0,245,212,0.1)", border: "1px solid rgba(0,245,212,0.3)", color: "#00f5d4", cursor: "pointer", fontFamily: "inherit" }}>Retry</button>
       </div>
     </div>
   );

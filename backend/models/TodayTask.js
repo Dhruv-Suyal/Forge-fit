@@ -60,6 +60,12 @@ const todayTaskSchema = new mongoose.Schema({
       default: true
    },
 
+   // Links this task to a Profile.exercises entry — used to deduplicate daily sync
+   sourceExerciseId: {
+      type: mongoose.Schema.Types.ObjectId,
+      default: null
+   },
+
    date: {
       type: Date,
       default: Date.now

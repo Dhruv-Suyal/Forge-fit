@@ -53,20 +53,20 @@ function ExerciseCard({ exercise: initialExercise, index, onSave, saving }) {
     : exercise.image;
 
   const metaItems = [
-    { icon: <FiTarget />,    label: "Goal",      value: exercise.goal },
-    { icon: <FiLayers />,    label: "Category",  value: exercise.category },
-    { icon: <FiBarChart2 />, label: "Difficulty",value: exercise.difficulty, isBadge: true },
-    { icon: <FiRepeat />,    label: "Sets",      value: exercise.sets },
-    { icon: <FiRepeat />,    label: "Reps",      value: exercise.reps },
-    { icon: <FiClock />,     label: "Duration",  value: exercise.duration ? `${exercise.duration} min` : null },
-    { icon: <FiClock />,     label: "Best Time", value: exercise.preferredTime },
+    { icon: <FiTarget />,    label: "Goal",       key: "goal",          value: exercise.goal },
+    { icon: <FiLayers />,    label: "Category",   key: "category",      value: exercise.category },
+    { icon: <FiBarChart2 />, label: "Difficulty", key: "difficulty",    value: exercise.difficulty, isBadge: true },
+    { icon: <FiRepeat />,    label: "Sets",        key: "sets",          value: exercise.sets },
+    { icon: <FiRepeat />,    label: "Reps",        key: "reps",          value: exercise.reps },
+    { icon: <FiClock />,     label: "Duration",    key: "duration",      value: exercise.duration ? `${exercise.duration} min` : null },
+    { icon: <FiClock />,     label: "Best Time",   key: "preferredTime", value: exercise.preferredTime },
   ].filter(m => m.value != null && m.value !== "");
 
   const handleSave = () => {
     gsap.timeline()
       .to(cardRef.current, { scale: 0.97, duration: 0.1 })
       .to(cardRef.current, { scale: 1, duration: 0.2, ease: "back.out(1.4)" });
-    onSave(exercise);
+    onSave(exercise, index);
   };
 
   return (
@@ -221,8 +221,8 @@ function ExerciseCard({ exercise: initialExercise, index, onSave, saving }) {
                   : editMode
                     ? (
                       <input
-                        value={exercise[m.label.toLowerCase().replace(/\s/g,"")] || m.value || ""}
-                        onChange={e => setExercise(p => ({ ...p, [m.label.toLowerCase().replace(/\s/g,"")]: e.target.value }))}
+                        value={exercise[m.key] ?? ""}
+                        onChange={e => setExercise(p => ({ ...p, [m.key]: e.target.value }))}
                         style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(0,245,212,0.2)", borderRadius: 6, padding: "3px 7px", color: "#fff", fontFamily: "var(--font-main)", fontSize: 11, fontWeight: 600, width: "100%", outline: "none", boxSizing: "border-box" }}
                       />
                     )

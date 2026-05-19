@@ -64,6 +64,87 @@ Format:
 };
 
 
+// ================================
+// GENERATE FULL DAY TASKS WITH AI
+// ================================
+
+const generateDayTasksWithAI = async (profile) => {
+
+   // Build exercise list for the prompt
+   const exerciseLines = (profile.exercises || [])
+      .filter(e => e.isActive !== false)
+      .map(e =>
+         `  - "${e.title}" | category: ${e.category || 'exercise'} | difficulty: ${e.difficulty || 'beginner'} | ${e.duration || 30} min | preferred time: ${e.preferredTime || 'flexible'}`
+      ).join('\n') || '  None';
+
+   const habitList = (profile.habitsToBuild || []).join(', ') || 'None';
+
+   const prompt = `
+You are a fitness AI. Generate a complete, realistic daily schedule for this user.
+
+USER PROFILE:
+- Primary Goal: ${profile.primaryGoal || 'general fitness'}
+- Activity Level: ${profile.activityLevel || 'beginner'}
+- Wake Up Time: ${profile.wakeUpTime || '06:00 AM'}
+- Bedtime: ${profile.sleepTime || '10:00 PM'}
+- Habits To Build: ${habitList}
+
+SAVED EXERCISES (you MUST include ALL of these in the schedule at their preferred times):
+${exerciseLines}
+
+SCHEDULING RULES:
+1. First task = morning routine at the wake-up time
+2. Include ALL saved exercises at their exact preferred times
+3. Spread habit tasks through morning (after wake-up) and evening (around 18:00)
+4. Last task = wind-down / sleep reminder at bedtime
+5. scheduledTime MUST be 24-hour format "HH:MM" (e.g. "06:30", "18:00")
+6. category must be exactly one of: exercise, strength, cardio, mobility, mindfulness, sleep, hydration, learning
+7. difficulty must be exactly one of: easy, medium, hard
+8. xpReward: 5 for light habits, 10 for moderate tasks, 20-30 for workouts
+9. duration is in minutes (integer)
+
+STRICT EXCLUSIONS — do NOT generate any tasks related to:
+- Diet, meals, food, eating, breakfast, lunch, dinner, snacks, calories, nutrition
+- Diet tracking or meal planning of any kind
+(Diet is handled separately in the app's Food Intake section)
+
+Return ONLY valid JSON — no markdown, no explanation, nothing else:
+{
+  "tasks": [
+    {
+      "title": "",
+      "description": "",
+      "category": "",
+      "scheduledTime": "HH:MM",
+      "duration": 15,
+      "difficulty": "easy",
+      "xpReward": 10
+    }
+  ]
+}
+`;
+
+   const result   = await model.generateContent(prompt);
+   const response = result.response.text();
+   const cleaned  = response
+      .replace(/```json/g, '')
+      .replace(/```/g, '')
+      .trim();
+
+   // Safety check
+   if (!cleaned.startsWith('{')) {
+      throw new Error('AI returned invalid JSON format for day tasks');
+   }
+
+   const parsed = JSON.parse(cleaned);
+   if (!Array.isArray(parsed.tasks)) {
+      throw new Error('AI response missing tasks array');
+   }
+
+   return parsed.tasks;
+};
+
+
 
 // ================================
 // SEARCH EXERCISE WITH AI
@@ -182,5 +263,6 @@ Rules:
 
 module.exports = {
    generateTasksWithAI,
+   generateDayTasksWithAI,
    searchExercise
 };

@@ -1,4 +1,5 @@
-const Profile = require('../models/Profile');
+const Profile   = require('../models/Profile');
+const TodayTask = require('../models/TodayTask');
 
 exports.getExercise = async (req, res) => {
    try {
@@ -31,9 +32,16 @@ exports.addExercise = async (req, res) => {
                                  title.toLowerCase()
                            );
 
+      // If an exercise with the same title exists, UPDATE it (edited save)
       if (alreadyExists) {
-         return res.status(400).json({
-            message: "Exercise already exists"
+         Object.assign(alreadyExists, {
+            goal, category, difficulty,
+            sets, reps, duration, preferredTime, image, video
+         });
+         await profile.save();
+         return res.status(200).json({
+            message: "Exercise updated successfully",
+            exercises: profile.exercises
          });
       }
 
@@ -72,6 +80,17 @@ exports.deleteExercise = async (req, res) => {
 
       profile.exercises.splice(index, 1);
       await profile.save();
+
+      // Also remove any auto-generated TodayTask for this exercise
+      const today = new Date().toISOString().split('T')[0];
+      const dayStart = new Date(today);
+      const dayEnd   = new Date(today);
+      dayEnd.setDate(dayEnd.getDate() + 1);
+      await TodayTask.deleteOne({
+        userId,
+        sourceExerciseId: exerciseId,
+        date: { $gte: dayStart, $lt: dayEnd },
+      });
 
       return res.status(200).json({
          message: "Exercise deleted successfully",
