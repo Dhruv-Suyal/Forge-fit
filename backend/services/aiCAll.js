@@ -261,8 +261,131 @@ Rules:
 
 
 
+// ================================
+// GENERATE DIET PLAN WITH AI
+// ================================
+
+const generateDietWithAI = async (title, goal) => {
+
+   const prompt = `
+You are an expert nutritionist AI. Generate exactly 3 distinct diet plan variations for the given title and goal.
+
+Diet Plan Title: ${title}
+Goal: ${goal}
+
+Return ONLY valid JSON — no markdown, no explanation, nothing else.
+
+JSON format (array of 3 plans):
+[
+  {
+    "title": "${title} — High Protein",
+    "goal": "${goal}",
+    "category": "High Protein",
+    "totalCalories": 2400,
+    "imageSearch": "healthy high protein meal prep food",
+    "meals": [
+      {
+        "type": "Breakfast",
+        "title": "Power Morning Bowl",
+        "calories": 580,
+        "foods": ["Oats 100g", "Whey Protein 30g", "Banana", "Almond Milk 200ml"],
+        "time": "8:00 AM",
+        "macros": { "protein": "38g", "carbs": "65g", "fat": "10g" }
+      },
+      {
+        "type": "Lunch",
+        "title": "",
+        "calories": 0,
+        "foods": [],
+        "time": "",
+        "macros": { "protein": "", "carbs": "", "fat": "" }
+      },
+      {
+        "type": "Snack",
+        "title": "",
+        "calories": 0,
+        "foods": [],
+        "time": "",
+        "macros": { "protein": "", "carbs": "", "fat": "" }
+      },
+      {
+        "type": "Dinner",
+        "title": "",
+        "calories": 0,
+        "foods": [],
+        "time": "",
+        "macros": { "protein": "", "carbs": "", "fat": "" }
+      }
+    ]
+  },
+  { second variation with different category and approach },
+  { third variation with different category and approach }
+]
+
+Rules:
+- Return exactly 3 plan objects in a JSON array
+- Each plan MUST have a different category (e.g. High Protein, Balanced, Ketogenic, Mediterranean, Low Carb, Plant-Based)
+- Each plan must have exactly 4 meals: Breakfast, Lunch, Snack, Dinner
+- Total calories must reflect the goal (weight-loss ~1700, maintenance ~2200, muscle-gain ~2600, performance ~3000)
+- imageSearch must be a specific phrase like "ketogenic meal prep avocado eggs" — different per plan
+- Each plan must have realistic, specific foods with quantities
+- Macros must be realistic strings like "38g"
+- Times must be realistic 12-hour format
+- Tailor all plans specifically to the goal: "${goal}"
+`;
+
+   // ── Retry helper — handles Gemini 503 overload spikes ──────────────────────
+   const MAX_RETRIES  = 3;
+   const RETRY_DELAY  = 2000; // ms — doubles on each attempt
+
+   const callWithRetry = async (attempt = 1) => {
+      try {
+         const result   = await model.generateContent(prompt);
+         const response = result.response.text();
+         const cleaned  = response
+            .replace(/```json/g, '')
+            .replace(/```/g, '')
+            .trim();
+
+         if (!cleaned.startsWith('[')) {
+            throw new Error('AI returned invalid JSON for diet plans');
+         }
+
+         const plans = JSON.parse(cleaned);
+         if (!Array.isArray(plans) || plans.length === 0) {
+            throw new Error('AI response missing plans array');
+         }
+
+         // Fetch Unsplash image for each plan
+         for (const plan of plans) {
+            plan.image = await getExerciseImage(plan.imageSearch || `${plan.category} healthy meal`);
+         }
+
+         return plans;
+
+      } catch (err) {
+         const is503 = err?.message?.includes('503') ||
+                       err?.message?.includes('Service Unavailable') ||
+                       err?.message?.includes('high demand');
+
+         if (is503 && attempt < MAX_RETRIES) {
+            const delay = RETRY_DELAY * attempt; // 2s → 4s → 6s
+            console.log(`[diet/AI] 503 received — retrying in ${delay}ms (attempt ${attempt}/${MAX_RETRIES})`);
+            await new Promise(r => setTimeout(r, delay));
+            return callWithRetry(attempt + 1);
+         }
+
+         throw err;
+      }
+   };
+
+   return callWithRetry();
+};
+
+
 module.exports = {
    generateTasksWithAI,
    generateDayTasksWithAI,
-   searchExercise
-};
+   searchExercise,
+   generateDietWithAI
+};

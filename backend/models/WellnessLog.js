@@ -15,15 +15,29 @@ const wellnessLogSchema = new mongoose.Schema({
     consumed: { type: Number, default: 0 },
     glassML:  { type: Number, default: 250 }
   },
-  food: [
-    {
-      id:    String,
-      meal:  String,
-      time:  String,
-      items: [String],
-      done:  { type: Boolean, default: false }
-    }
-  ],
+  dietPlan: {
+   title: String,
+
+   goal: String,
+
+   totalCalories: Number,
+
+   meals: [
+
+      {
+         type: String,
+
+         title: String,
+
+         calories: Number,
+
+         foods: [String],
+
+         time: String
+      }
+
+   ]
+},
   screenTime: [
     {
       id:    String,

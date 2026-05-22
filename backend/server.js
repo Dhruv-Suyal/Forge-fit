@@ -8,6 +8,7 @@ require('./utils/passport');
 const authRoute = require('./routes/auth');
 const homeRoute = require('./routes/home');
 const exerciseRoute = require("./routes/exercise");
+const dietRoute     = require("./routes/diet");
 connectDB();
 const app = express();
 
@@ -22,6 +23,7 @@ app.use(passport.initialize());
 app.use('/api/auth', authRoute);
 app.use('/api/home', homeRoute);
 app.use('/api',exerciseRoute);
+app.use('/api/diet', dietRoute);
 
 const PORT = process.env.PORT || 5000;
 

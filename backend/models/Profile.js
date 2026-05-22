@@ -115,6 +115,45 @@ const profileSchema = new mongoose.Schema({
          default: true
       }
    }
+],
+
+   diets: [
+   {
+      title: {
+         type: String,
+         required: true
+      },
+
+      goal: String,
+
+      category: String,       // e.g. "High Protein", "Ketogenic"
+
+      totalCalories: Number,
+
+      image: String,          // Unsplash URL
+
+      imageSearch: String,    // query used to fetch image
+
+      meals: [
+         {
+            type:     String, // Breakfast | Lunch | Snack | Dinner
+            title:    String,
+            calories: Number,
+            foods:    [String],
+            time:     String,
+            macros: {
+               protein: String,
+               carbs:   String,
+               fat:     String
+            }
+         }
+      ],
+
+      isActive: {
+         type: Boolean,
+         default: true
+      }
+   }
 ]
 
 
