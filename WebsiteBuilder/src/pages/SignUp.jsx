@@ -200,7 +200,7 @@ export function SignUp() {
         .nav-link { color:#555; font-size:14px; text-decoration:none; transition:color .2s; } .nav-link:hover{color:#e2e2f0;}
 
         .badge-anim { animation:borderGlow 3s ease-in-out infinite; }
-        .dot-pulse { animation:pulseDot 2s ease-in-out infinite; }
+        .dot-pulse { animation:pulseDot 2s ease-in-out infinite; box-shadow:0 0 10px #6366f1; }
         .spin { animation:spin .8s linear infinite; }
 
         .divider-line { flex:1; height:1px; background:rgba(255,255,255,.06); }
@@ -219,14 +219,14 @@ export function SignUp() {
       <nav style={{ position: "fixed", top: 0, inset: "0 0 auto", zIndex: 100, borderBottom: "1px solid rgba(255,255,255,.06)", background: "rgba(0,0,8,.85)", backdropFilter: "blur(24px)" }}>
         <div style={{ maxWidth: 1200, margin: "0 auto", padding: "0 28px", height: 64, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
           <a href="/" style={{ display: "flex", alignItems: "center", gap: 10, textDecoration: "none" }}>
-            <div style={{ width: 34, height: 34, borderRadius: 9, background: "linear-gradient(135deg,#3b82f6,#7c3aed)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 17, fontWeight: 800, color: "#fff", boxShadow: "0 0 18px rgba(99,102,241,.5)" }}>W</div>
-            <span style={{ fontSize: 17, fontWeight: 700, color: "#fff", letterSpacing: "-.3px" }}>Forge<span className="grad-text">AI</span></span>
+            <div style={{ width: 34, height: 34, borderRadius: 9, background: "linear-gradient(135deg,#3b82f6,#7c3aed)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 17, fontWeight: 800, color: "#fff", boxShadow: "0 0 18px rgba(99,102,241,.5)" }}>🏋</div>
+            <span style={{ fontSize: 17, fontWeight: 700, color: "#fff", letterSpacing: "-.3px" }}>Fitness<span className="grad-text">ForgeAI</span></span>
           </a>
           <div style={{ display: "flex", alignItems: "center", gap: 24 }}>
             <a href="/" className="nav-link">Home</a>
-            <a href="#" className="nav-link">Features</a>
-            <a href="#" className="nav-link">Pricing</a>
-            <a href="/logIn" style={{ fontSize: 14, fontWeight: 600, color: "#818cf8", textDecoration: "none" }}>log In →</a>
+            <a href="#" className="nav-link">Workouts</a>
+            <a href="#" className="nav-link">Nutrition</a>
+            <a href="/logIn" style={{ fontSize: 14, fontWeight: 600, color: "#818cf8", textDecoration: "none" }}>Log In →</a>
           </div>
         </div>
       </nav>
@@ -240,23 +240,23 @@ export function SignUp() {
           <div>
             <div className="badge-anim a1" style={{ display: "inline-flex", alignItems: "center", gap: 8, background: "rgba(99,102,241,.1)", border: "1px solid rgba(99,102,241,.25)", borderRadius: 100, padding: "6px 18px 6px 10px", marginBottom: 40 }}>
               <span className="dot-pulse" style={{ width: 7, height: 7, borderRadius: "50%", background: "#6366f1", boxShadow: "0 0 10px #6366f1", display: "inline-block" }} />
-              <span style={{ fontSize: 12, fontWeight: 600, color: "#a5b4fc", fontFamily: "'JetBrains Mono',monospace", letterSpacing: ".5px" }}>50,000+ sites built this month</span>
+              <span style={{ fontSize: 12, fontWeight: 600, color: "#a5b4fc", fontFamily: "'JetBrains Mono',monospace", letterSpacing: ".5px" }}>2.1M+ workouts tracked this month</span>
             </div>
 
             <h1 className="a2" style={{ fontSize: "clamp(32px,3.5vw,52px)", fontWeight: 800, color: "#fff", letterSpacing: -2, lineHeight: 1.1, marginBottom: 18 }}>
-              Build websites<br />
-              <span className="grad-text">from a prompt.</span>
+              Track fitness,<br />
+              <span className="grad-text">crush your goals.</span>
             </h1>
             <p className="a3" style={{ fontSize: 16, color: "#33335a", lineHeight: 1.75, maxWidth: 380, marginBottom: 48 }}>
-              Describe your website in plain English. ForgeAI generates a fully functional, production-ready site in seconds.
+              Describe your fitness goals in plain English. FitnessForgeAI builds you a personalised workout & nutrition plan in seconds.
             </p>
 
             {/* Feature list */}
             <div className="a4" style={{ display: "flex", flexDirection: "column", gap: 14 }}>
               {[
-                { icon: "⚡", title: "Generate in 12 seconds", desc: "Fastest AI website builder on the market" },
-                { icon: "✦", title: "Export clean React + Tailwind", desc: "Production code you actually want to ship" },
-                { icon: "🚀", title: "One-click deploy", desc: "Custom domain, SSL, global CDN — included" },
+                { icon: "🔥", title: "AI Workout Plans", desc: "Personalised routines generated in under 10 seconds" },
+                { icon: "🥗", title: "Smart Nutrition Tracking", desc: "Meal plans & macros tailored to your body goals" },
+                { icon: "📊", title: "Progress Analytics", desc: "Visual dashboards — weight, reps, calories & more" },
               ].map((f) => (
                 <div key={f.title} className="feat">
                   <div className="feat-icon">{f.icon}</div>
@@ -275,13 +275,13 @@ export function SignUp() {
               {[1,2,3,4,5].map(i => <span key={i} style={{ color: "#fbbf24", fontSize: 14 }}>★</span>)}
             </div>
             <p style={{ fontSize: 14, color: "#6060a0", lineHeight: 1.7, marginBottom: 14, fontStyle: "italic" }}>
-              "I built and shipped my entire SaaS landing page in under 20 minutes. ForgeAI is genuinely magic."
+              "I lost 18 kg and ran my first marathon using FitnessForgeAI. The AI meal plans and workout tracker are genuinely game-changing."
             </p>
             <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-              <div style={{ width: 34, height: 34, borderRadius: "50%", background: "linear-gradient(135deg,#3b82f6,#a855f7)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 13, fontWeight: 700, color: "#fff" }}>AK</div>
+              <div style={{ width: 34, height: 34, borderRadius: "50%", background: "linear-gradient(135deg,#3b82f6,#a855f7)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 13, fontWeight: 700, color: "#fff" }}>RK</div>
               <div>
-                <div style={{ fontSize: 13, fontWeight: 700, color: "#e2e2f0" }}>Aryan Kumar</div>
-                <div style={{ fontSize: 11, color: "#33335a", fontFamily: "'JetBrains Mono',monospace" }}>Founder @ LaunchFast</div>
+                <div style={{ fontSize: 13, fontWeight: 700, color: "#e2e2f0" }}>Rahul Khanna</div>
+                <div style={{ fontSize: 11, color: "#33335a", fontFamily: "'JetBrains Mono',monospace" }}>Marathon Runner & Fitness Coach</div>
               </div>
             </div>
           </div>
@@ -294,7 +294,7 @@ export function SignUp() {
             {/* Header */}
             <div className="a1" style={{ marginBottom: 32 }}>
               <h2 style={{ fontSize: "clamp(26px,3vw,38px)", fontWeight: 800, color: "#fff", letterSpacing: -1.5, lineHeight: 1.1, marginBottom: 10 }}>
-                Create your account
+                Start your fitness journey
               </h2>
               <p style={{ fontSize: 15, color: "#33335a", fontWeight: 400 }}>
                 Free forever. No credit card required.
@@ -304,7 +304,7 @@ export function SignUp() {
             {/* Social Buttons */}
             <div className="a2" style={{ display: "flex", gap: 12, marginBottom: 24 }}>
               <button className="social-btn" onClick={()=>{
-                window.location.href = "http://localhost:5000/api/auth/google";
+                window.location.href = "https://forge-fit.onrender.com/api/auth/google";
               }}>
                 <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#EA4335" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#4285F4" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#34A853" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
                 Continue with Google
