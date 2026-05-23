@@ -8,6 +8,7 @@ import { useAuth } from "./context/AuthContext";
 import { Onboarding } from "./pages/Onboarding";
 import { ExercisePage } from "./pages/Exercise/ExercisePage";
 import { Diet } from "./pages/Diet/Diet";
+import HealthPage from "./pages/Health/HealthPage";
 
 export function App(){
 
@@ -24,6 +25,7 @@ export function App(){
         </ProtectedRoute>}/>
         <Route path="/exercise" element={<ProtectedRoute><ExercisePage/></ProtectedRoute>}/>
         <Route path="/diet" element={<ProtectedRoute><Diet/></ProtectedRoute>}/>
+        <Route path="/health" element={<ProtectedRoute><HealthPage/></ProtectedRoute>}/>
     </Routes>
   </BrowserRouter>
   </>

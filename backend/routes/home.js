@@ -21,7 +21,6 @@ function to24h(str) {
   return `${String(h).padStart(2,'0')}:${String(m||0).padStart(2,'0')}`;
 }
 
-
 // XP reward based on exercise difficulty
 function xpForDifficulty(diff) {
   if (!diff) return 10;
@@ -58,14 +57,28 @@ function buildExerciseTask(userId, ex, today) {
   };
 }
 
+// ── Build food[] from active Profile diet ─────────────────────────────────────
+function buildFoodFromDiet(diet) {
+  if (!diet || !diet.meals || diet.meals.length === 0) return null;
+  return diet.meals.map((meal, idx) => ({
+    id:       `f${idx + 1}`,
+    meal:     meal.type || meal.title || 'Meal',
+    time:     to24h(meal.time || '08:00'),
+    calories: meal.calories || 0,
+    items:    meal.foods || [],
+    macros:   meal.macros || { protein: '0g', carbs: '0g', fat: '0g' },
+    done:     false,
+  }));
+}
 
-// ── Default wellness data ─────────────────────────────────────────────────────
+// ── Default food fallback (no active diet) ─────────────────────────────────────
 const DEFAULT_FOOD = [
-  { id: 'f1', meal: 'Breakfast', time: '07:30', items: ['Oats + banana', '2 boiled eggs', 'Green tea'],    done: false },
-  { id: 'f2', meal: 'Lunch',     time: '13:00', items: ['Brown rice', 'Dal', 'Salad', 'Curd'],              done: false },
-  { id: 'f3', meal: 'Evening',   time: '17:00', items: ['Fruit bowl', 'Handful nuts'],                      done: false },
-  { id: 'f4', meal: 'Dinner',    time: '19:00', items: ['Roti × 2', 'Sabzi', 'Soup'],                       done: false },
+  { id: 'f1', meal: 'Breakfast', time: '07:30', calories: 450, items: ['Oats + banana', '2 boiled eggs', 'Green tea'],    macros: { protein: '22g', carbs: '55g', fat: '8g'  }, done: false },
+  { id: 'f2', meal: 'Lunch',     time: '13:00', calories: 600, items: ['Brown rice', 'Dal', 'Salad', 'Curd'],              macros: { protein: '28g', carbs: '80g', fat: '10g' }, done: false },
+  { id: 'f3', meal: 'Evening',   time: '17:00', calories: 200, items: ['Fruit bowl', 'Handful nuts'],                      macros: { protein: '5g',  carbs: '30g', fat: '7g'  }, done: false },
+  { id: 'f4', meal: 'Dinner',    time: '19:00', calories: 500, items: ['Roti × 2', 'Sabzi', 'Soup'],                       macros: { protein: '18g', carbs: '60g', fat: '9g'  }, done: false },
 ];
+
 const DEFAULT_SCREEN = [
   { id: 's1', app: 'Instagram', icon: '◈', limit: 20, used: 0, color: '#e1306c' },
   { id: 's2', app: 'YouTube',   icon: '⟡', limit: 30, used: 0, color: '#ff0000' },
@@ -73,9 +86,6 @@ const DEFAULT_SCREEN = [
 ];
 
 // ── GET /api/home/today ───────────────────────────────────────────────────────
-// FLOW:
-//   tasks.length === 0 → first open of the day → generate full day task list
-//   tasks.length  >  0 → day already started   → only sync newly added exercises
 router.get('/today', authMiddleware, async (req, res) => {
   try {
     const today  = getToday();
@@ -155,29 +165,48 @@ router.get('/today', authMiddleware, async (req, res) => {
       }
     }
 
-    // Wellness log — get or create
+    // ── Wellness log — get or create, seed food from profile diet ─────────────
     let wellness = await WellnessLog.findOne({ userId, date: today });
     if (!wellness) {
+      // Try to use active diet from profile
+      const activeDiet = (profile?.diets || []).find(d => d.isActive !== false);
+      const foodEntries = activeDiet
+        ? buildFoodFromDiet(activeDiet)
+        : DEFAULT_FOOD;
+
       wellness = await WellnessLog.create({
         userId,
         date:       today,
-        food:       DEFAULT_FOOD,
+        food:       foodEntries || DEFAULT_FOOD,
         screenTime: DEFAULT_SCREEN,
+        score:      0,
+        // Snapshot the diet plan used today
+        dietPlan:   activeDiet || null,
       });
     }
 
-    // Weekly scores (last 7 days)
+    // ── Weekly scores (last 7 days) from stored WellnessLog.score ────────────
+    const weekStart = new Date();
+    weekStart.setDate(weekStart.getDate() - 6);
+    const weekStartStr = weekStart.toISOString().split('T')[0];
+
+    // Fetch all wellness logs for the past 7 days
+    const weekLogs = await WellnessLog.find({
+      userId,
+      date: { $gte: weekStartStr, $lte: today }
+    }).select('date score');
+
+    // Build a date→score map
+    const scoreByDate = {};
+    weekLogs.forEach(log => { scoreByDate[log.date] = log.score || 0; });
+
+    // Fill 7 days in order (oldest → newest)
     const weeklyScores = [];
     for (let i = 6; i >= 0; i--) {
-      const d = new Date();
+      const d  = new Date();
       d.setDate(d.getDate() - i);
-      const ds     = d.toISOString().split('T')[0];
-      const ds_end = new Date(ds);
-      ds_end.setDate(ds_end.getDate() + 1);
-      const dayTasks  = await TodayTask.find({ userId, date: { $gte: new Date(ds), $lt: ds_end } });
-      const total     = dayTasks.reduce((s, t) => s + (t.xpReward || 0), 0);
-      const completed = dayTasks.filter(t => t.completed).reduce((s, t) => s + (t.xpReward || 0), 0);
-      weeklyScores.push(total > 0 ? Math.round((completed / total) * 100) : 0);
+      const ds = d.toISOString().split('T')[0];
+      weeklyScores.push(scoreByDate[ds] || 0);
     }
 
     res.json({ success: true, tasks, wellness, profile, weeklyScores });
@@ -264,6 +293,26 @@ router.patch('/wellness/screentime', authMiddleware, async (req, res) => {
     app.used = minutes;
     await wellness.save();
     res.json({ success: true, screenTime: wellness.screenTime });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+// ── PATCH /api/home/wellness/score ───────────────────────────────────────────
+// Save the composite daily score (computed on frontend) to the DB
+router.patch('/wellness/score', authMiddleware, async (req, res) => {
+  try {
+    const { score } = req.body;
+    if (typeof score !== 'number' || score < 0 || score > 100) {
+      return res.status(400).json({ success: false, message: 'Score must be 0-100' });
+    }
+    const today    = getToday();
+    const wellness = await WellnessLog.findOneAndUpdate(
+      { userId: req.user.id, date: today },
+      { score },
+      { new: true, upsert: true }
+    );
+    res.json({ success: true, score: wellness.score });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
   }

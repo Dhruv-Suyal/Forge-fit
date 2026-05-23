@@ -136,7 +136,7 @@ const profileSchema = new mongoose.Schema({
 
       meals: [
          {
-            type:     String, // Breakfast | Lunch | Snack | Dinner
+            type:     { type: String }, // Breakfast | Lunch | Snack | Dinner
             title:    String,
             calories: Number,
             foods:    [String],
@@ -159,4 +159,4 @@ const profileSchema = new mongoose.Schema({
 
 },{timestamps:true});
 
-module.exports = mongoose.model("Profile", profileSchema);
+module.exports = mongoose.model("Profile", profileSchema);

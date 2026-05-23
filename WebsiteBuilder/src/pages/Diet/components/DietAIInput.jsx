@@ -20,8 +20,17 @@ const GOALS = [
   { value: "general health",label: "🌿  General Health", color: "#0ea5e9" },
 ];
 
+const DIETARY_OPTIONS = [
+  { value: "none",       label: "🥗 No Restrictions" },
+  { value: "vegetarian", label: "🥬 Vegetarian" },
+  { value: "vegan",      label: "🌱 Vegan" },
+  { value: "keto",       label: "🥓 Keto" },
+  { value: "paleo",      label: "🍖 Paleo" },
+  { value: "gluten-free",label: "🌾 Gluten-Free" },
+];
+
 export function DietAIInput({ onGenerated, loading: externalLoading }) {
-  const [form,    setForm]    = useState({ title: "", goal: "" });
+  const [form,    setForm]    = useState({ title: "", goal: "", dietaryRestrictions: "none" });
   const [loading, setLoading] = useState(false);
   const [aiMsg,   setAiMsg]   = useState(AI_MESSAGES[0]);
   const [error,   setError]   = useState("");
@@ -144,6 +153,33 @@ export function DietAIInput({ onGenerated, loading: externalLoading }) {
                       }}
                     >
                       {g.label}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Dietary Restrictions */}
+            <div>
+              <label style={labelStyle}>DIETARY RESTRICTIONS</label>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(140px,1fr))", gap: 10 }}>
+                {DIETARY_OPTIONS.map(d => {
+                  const active = form.dietaryRestrictions === d.value;
+                  return (
+                    <button key={d.value}
+                      onClick={() => setForm(f => ({ ...f, dietaryRestrictions: d.value }))}
+                      disabled={isLoading}
+                      style={{
+                        padding: "11px 14px", borderRadius: 12, cursor: "pointer",
+                        fontFamily: "var(--font-main)", fontSize: 13, fontWeight: 600,
+                        textAlign: "center", transition: "all 0.2s",
+                        background: active ? "rgba(0,245,212,0.15)" : "rgba(255,255,255,0.03)",
+                        border: active ? "1px solid rgba(0,245,212,0.5)" : "1px solid rgba(255,255,255,0.08)",
+                        color: active ? "#00f5d4" : "rgba(255,255,255,0.5)",
+                        boxShadow: active ? "0 0 20px rgba(0,245,212,0.15)" : "none",
+                      }}
+                    >
+                      {d.label}
                     </button>
                   );
                 })}

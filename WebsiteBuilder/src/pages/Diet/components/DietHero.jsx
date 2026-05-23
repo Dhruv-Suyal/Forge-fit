@@ -59,14 +59,16 @@ export function DietHero({ todayPlan }) {
     return () => hero.removeEventListener("mousemove", onMouseMove);
   }, []);
 
-  const totalCal     = todayPlan?.totalCalories ?? "—";
-  const mealCount    = todayPlan?.meals?.length  ?? "—";
-  const planTitle    = todayPlan?.title          ?? "None";
+  const totalCal   = todayPlan?.totalCalories ?? "—";
+  const mealCount  = todayPlan?.meals?.length  ?? "—";
+  const planTitle  = todayPlan?.title
+    ? (todayPlan.title.length > 11 ? todayPlan.title.slice(0, 10) + "…" : todayPlan.title)
+    : "None";
 
   const STATS = [
-    { label: "Today's Calories", value: totalCal,  unit: "kcal",  icon: "🔥", color: "#f97316" },
-    { label: "Meals Planned",    value: mealCount,  unit: "meals", icon: "🥗", color: "#00f5d4" },
-    { label: "Active Plan",      value: planTitle.length > 12 ? planTitle.slice(0,11)+"…" : planTitle, unit: "", icon: "⚡", color: "#7c3aed" },
+    { label: "Plan Calories",  value: totalCal,  unit: "kcal/day", icon: "🔥", color: "#f97316" },
+    { label: "Meals Per Day",  value: mealCount,  unit: "meals",   icon: "🥗", color: "#00f5d4" },
+    { label: "Active Plan",    value: planTitle,  unit: "",        icon: "⚡", color: "#7c3aed" },
   ];
 
   return (

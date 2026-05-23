@@ -64,6 +64,7 @@ Format:
 };
 
 
+
 // ================================
 // GENERATE FULL DAY TASKS WITH AI
 // ================================
@@ -77,36 +78,41 @@ const generateDayTasksWithAI = async (profile) => {
          `  - "${e.title}" | category: ${e.category || 'exercise'} | difficulty: ${e.difficulty || 'beginner'} | ${e.duration || 30} min | preferred time: ${e.preferredTime || 'flexible'}`
       ).join('\n') || '  None';
 
-   const habitList = (profile.habitsToBuild || []).join(', ') || 'None';
+   const habitsToBuild = (profile.habitsToBuild || []).join(', ') || 'None';
+   const habitsToQuit  = (profile.habitsToQuit  || []).join(', ') || 'None';
 
    const prompt = `
-You are a fitness AI. Generate a complete, realistic daily schedule for this user.
+You are a wellness AI coach. Generate a complete, realistic daily schedule for this user.
 
 USER PROFILE:
 - Primary Goal: ${profile.primaryGoal || 'general fitness'}
 - Activity Level: ${profile.activityLevel || 'beginner'}
 - Wake Up Time: ${profile.wakeUpTime || '06:00 AM'}
 - Bedtime: ${profile.sleepTime || '10:00 PM'}
-- Habits To Build: ${habitList}
+- Habits To BUILD: ${habitsToBuild}
+- Habits To QUIT: ${habitsToQuit}
 
 SAVED EXERCISES (you MUST include ALL of these in the schedule at their preferred times):
 ${exerciseLines}
 
 SCHEDULING RULES:
-1. First task = morning routine at the wake-up time
-2. Include ALL saved exercises at their exact preferred times
-3. Spread habit tasks through morning (after wake-up) and evening (around 18:00)
-4. Last task = wind-down / sleep reminder at bedtime
-5. scheduledTime MUST be 24-hour format "HH:MM" (e.g. "06:30", "18:00")
-6. category must be exactly one of: exercise, strength, cardio, mobility, mindfulness, sleep, hydration, learning
-7. difficulty must be exactly one of: easy, medium, hard
-8. xpReward: 5 for light habits, 10 for moderate tasks, 20-30 for workouts
-9. duration is in minutes (integer)
+1. FIRST task = "Morning Routine" at the wake-up time (category: mindfulness, duration: 10, xpReward: 5)
+2. Include ALL saved exercises at their exact preferred times — do NOT change their times
+3. For each habit in "Habits To BUILD": create 1-2 tasks spread across morning and evening with realistic times
+4. For each habit in "Habits To QUIT": create 1 AVOIDANCE REMINDER task timed 30-60 min before bedtime. Title format: "⚠ Avoid [habit name]". Description should explain WHY to avoid it tonight. category: "habit-quit", xpReward: 15
+5. Add a SLEEP PREP task 30 minutes before bedtime (category: sleep, title: "Wind Down & Sleep Prep", duration: 30, xpReward: 10)
+6. LAST task = sleep reminder exactly at bedtime (category: sleep, title: "Lights Out — Good Night 🌙", duration: 5, xpReward: 5)
+7. scheduledTime MUST be 24-hour format "HH:MM" (e.g. "06:30", "21:30")
+8. category must be exactly one of: exercise, strength, cardio, mobility, mindfulness, sleep, hydration, learning, habit, habit-quit
+9. difficulty must be exactly one of: easy, medium, hard
+10. xpReward: 5 for light habits/reminders, 10-15 for moderate tasks, 20-30 for workouts
+11. duration is in minutes (integer)
+12. Ensure NO two tasks overlap in time — space them at least 30 min apart
+13. Sort tasks by scheduledTime ascending
 
 STRICT EXCLUSIONS — do NOT generate any tasks related to:
 - Diet, meals, food, eating, breakfast, lunch, dinner, snacks, calories, nutrition
 - Diet tracking or meal planning of any kind
-(Diet is handled separately in the app's Food Intake section)
 
 Return ONLY valid JSON — no markdown, no explanation, nothing else:
 {
@@ -265,10 +271,26 @@ Rules:
 // GENERATE DIET PLAN WITH AI
 // ================================
 
-const generateDietWithAI = async (title, goal) => {
+const generateDietWithAI = async (title, goal, dietaryRestrictions = '') => {
+
+   // Build restriction instructions
+   let restrictionInstructions = '';
+   if (dietaryRestrictions && dietaryRestrictions.toLowerCase() !== 'none') {
+      if (dietaryRestrictions.toLowerCase().includes('vegetarian')) {
+         restrictionInstructions = `\n\nSTRICT RULE: ALL foods must be VEGETARIAN. NO meat, poultry, or fish. Only eggs, dairy, plant proteins allowed.`;
+      } else if (dietaryRestrictions.toLowerCase().includes('vegan')) {
+         restrictionInstructions = `\n\nSTRICT RULE: ALL foods must be 100% VEGAN. NO animal products at all. Use plant-based proteins, milks, butters.`;
+      } else if (dietaryRestrictions.toLowerCase().includes('keto') || dietaryRestrictions.toLowerCase().includes('ketogenic')) {
+         restrictionInstructions = `\n\nSTRICT RULE: ALL foods must be KETOGENIC. High fat, moderate protein, VERY low carbs (<20g/day). NO bread, pasta, sugar, most fruits.`;
+      } else if (dietaryRestrictions.toLowerCase().includes('paleo')) {
+         restrictionInstructions = `\n\nSTRICT RULE: ALL foods must be PALEO. Whole foods only. NO grains, legumes, dairy, processed foods. Meat, fish, eggs, vegetables, nuts allowed.`;
+      } else if (dietaryRestrictions.toLowerCase().includes('gluten-free')) {
+         restrictionInstructions = `\n\nSTRICT RULE: ALL foods must be GLUTEN-FREE. NO wheat, barley, rye, or related products. Use GF alternatives.`;
+      }
+   }
 
    const prompt = `
-You are an expert nutritionist AI. Generate exactly 3 distinct diet plan variations for the given title and goal.
+You are an expert nutritionist AI. Generate exactly 3 distinct diet plan variations for the given title and goal.${restrictionInstructions}
 
 Diet Plan Title: ${title}
 Goal: ${goal}
@@ -388,4 +410,4 @@ module.exports = {
    generateDayTasksWithAI,
    searchExercise,
    generateDietWithAI
-};
+};
