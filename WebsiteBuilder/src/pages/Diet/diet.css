@@ -1,0 +1,104 @@
+/* ─── Diet Page CSS ─────────────────────────────────────────── */
+
+@import url("https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;700;800;900&family=JetBrains+Mono:wght@400;600;700&display=swap");
+
+:root {
+  --diet-teal:    #00f5d4;
+  --diet-purple:  #7c3aed;
+  --diet-amber:   #f59e0b;
+  --diet-sky:     #0ea5e9;
+  --diet-red:     #ef4444;
+  --diet-green:   #10b981;
+  --diet-bg:      #00000e;
+  --font-main:    "Sora", sans-serif;
+  --font-mono:    "JetBrains Mono", monospace;
+}
+
+/* Scrollbar */
+.diet-page::-webkit-scrollbar { width: 4px; }
+.diet-page::-webkit-scrollbar-track { background: transparent; }
+.diet-page::-webkit-scrollbar-thumb { background: rgba(0,245,212,0.25); border-radius: 2px; }
+
+/* Glass card */
+.diet-glass {
+  background: rgba(255,255,255,0.025);
+  border: 1px solid rgba(255,255,255,0.09);
+  backdrop-filter: blur(24px);
+  border-radius: 24px;
+  box-shadow: 0 24px 64px rgba(0,0,0,0.44);
+  position: relative;
+  overflow: hidden;
+}
+.diet-glass::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 10%; right: 10%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(0,245,212,0.3), transparent);
+  pointer-events: none;
+}
+
+/* Teal glass variant */
+.diet-glass-teal {
+  border-color: rgba(0,245,212,0.12);
+}
+
+/* Meal type color overrides */
+.diet-glass-breakfast { border-color: rgba(245,158,11,0.18); }
+.diet-glass-lunch     { border-color: rgba(16,185,129,0.18); }
+.diet-glass-snack     { border-color: rgba(14,165,233,0.18); }
+.diet-glass-dinner    { border-color: rgba(124,58,237,0.18); }
+
+/* Input focus */
+.diet-input:focus {
+  outline: none;
+  border-color: rgba(0,245,212,0.5) !important;
+  box-shadow: 0 0 0 4px rgba(0,245,212,0.07);
+}
+
+/* Spin animation */
+@keyframes diet-spin  { to { transform: rotate(360deg); } }
+@keyframes diet-spin-rev { to { transform: rotate(-360deg); } }
+
+/* Float */
+@keyframes diet-float {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-10px); }
+}
+
+/* Particle drift */
+@keyframes diet-particle {
+  0%, 100% { transform: translate(0,0) scale(1); opacity: 0.35; }
+  50%       { transform: translate(8px,-14px) scale(1.3); opacity: 0.6; }
+}
+
+/* Dot pulse */
+@keyframes diet-dot { 0%,100% { box-shadow: 0 0 6px var(--diet-teal); } 50% { box-shadow: 0 0 16px var(--diet-teal); } }
+
+/* Gradient text */
+.diet-gradient-text {
+  background: linear-gradient(135deg, var(--diet-teal), var(--diet-purple));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Shimmer bar animation on cards */
+@keyframes diet-shimmer {
+  0%   { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+/* Meal type icon badges */
+.diet-meal-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  border-radius: 99px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 1.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
