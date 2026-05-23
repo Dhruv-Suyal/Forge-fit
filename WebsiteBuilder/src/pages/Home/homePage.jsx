@@ -273,8 +273,11 @@ function ActivityPanel({ activities, onMarkDone, clock }) {
                 </div>
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
                   <span style={{ fontFamily: "var(--ff-mono)", fontSize: 9, color: "rgba(255,255,255,0.2)" }}>{act.duration}</span>
-                  {(isActive || isUp) && (
+                  {isActive && (
                     <button className="fp-done-btn" onClick={() => onMarkDone(act.id)}>✓ Done</button>
+                  )}
+                  {isUp && (
+                    <button className="fp-done-btn" style={{ opacity: 0.3, cursor: 'not-allowed' }} disabled title="Task starts at scheduled time">✓ Done</button>
                   )}
                   {isDone && <span style={{ fontFamily: "var(--ff-mono)", fontSize: 9, color: "rgba(0,245,212,0.4)" }}>Completed ✓</span>}
                   {isMissed && <span style={{ fontFamily: "var(--ff-mono)", fontSize: 9, color: "rgba(239,68,68,0.4)" }}>Missed</span>}

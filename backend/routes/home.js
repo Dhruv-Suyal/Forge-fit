@@ -147,13 +147,28 @@ router.get('/today', authMiddleware, async (req, res) => {
         }
       } else {
         // ── SUBSEQUENT OPENS: sync any newly saved exercises ─────────────────
+        // BOTH by sourceExerciseId AND by title (to avoid duplicates by either method)
         const existingExIds = new Set(
           tasks
             .filter(t => t.sourceExerciseId)
             .map(t => t.sourceExerciseId.toString())
         );
+        const existingTitles = new Set(
+          tasks
+            .map(t => (t.title || '').toLowerCase().trim())
+        );
+        
         const newExDocs = (profile.exercises || [])
-          .filter(ex => ex.isActive !== false && !existingExIds.has(ex._id.toString()))
+          .filter(ex => {
+            // Skip if already linked by ID
+            if (existingExIds.has(ex._id.toString())) return false;
+            // Skip if title already exists in today's tasks
+            const titleKey = (ex.title || '').toLowerCase().trim();
+            if (existingTitles.has(titleKey)) return false;
+            // Skip if not active
+            if (ex.isActive === false) return false;
+            return true;
+          })
           .map(ex => buildExerciseTask(userId, ex, today));
 
         if (newExDocs.length > 0) {
