@@ -1,6 +1,6 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const User = require('../models/User');
+const User = require('../models/user');
 const Profile = require('../models/Profile');
 const TodayTask = require('../models/TodayTask');
 const { generateTasksWithAI } = require('../services/aiCAll');

@@ -248,19 +248,19 @@ export function LoginPage() {
 
           {/* Logo */}
           <a href="/" style={{ display:"flex", alignItems:"center", gap:10, textDecoration:"none", flexShrink:0 }}>
-            <div style={{ width:34, height:34, borderRadius:9, background:"linear-gradient(135deg,#3b82f6,#7c3aed)", display:"flex", alignItems:"center", justifyContent:"center", fontSize:17, fontWeight:800, color:"#fff", boxShadow:"0 0 18px rgba(99,102,241,.5)" }}>W</div>
+            <div style={{ width:34, height:34, borderRadius:9, background:"linear-gradient(135deg,#3b82f6,#7c3aed)", display:"flex", alignItems:"center", justifyContent:"center", fontSize:17, fontWeight:800, color:"#fff", boxShadow:"0 0 18px rgba(99,102,241,.5)" }}>🏋</div>
             <span style={{ fontSize:17, fontWeight:700, color:"#fff", letterSpacing:"-.3px" }}>
-              Forge<span className="grad-text">AI</span>
+              Fitness<span className="grad-text">ForgeAI</span>
             </span>
           </a>
 
           {/* Desktop links */}
           <div className="nav-links-desktop">
-            {["Home","Features","Pricing","Showcase"].map(l => (
+            {["Home","Features","Workouts","Nutrition"].map(l => (
               <a key={l} href="#" className="nav-link">{l}</a>
             ))}
             <a href="/signup" style={{ display:"flex", alignItems:"center", gap:8, fontSize:14, fontWeight:600, color:"#fff", textDecoration:"none", background:"linear-gradient(135deg,#3b82f6,#6366f1,#a855f7)", padding:"8px 20px", borderRadius:10, boxShadow:"0 4px 20px rgba(99,102,241,.35)", whiteSpace:"nowrap" }}>
-              Sign up free
+              Start for free
             </a>
           </div>
 
@@ -279,12 +279,12 @@ export function LoginPage() {
       {/* Mobile menu */}
       {menuOpen && (
         <div className="mob-menu open">
-          {["Home","Features","Pricing","Showcase"].map(l => (
+          {["Home","Features","Workouts","Nutrition"].map(l => (
             <a key={l} href="#" className="mob-link" onClick={() => setMenuOpen(false)}>{l}</a>
           ))}
           <div className="mob-actions">
             <a href="/signin" style={{ width:"100%", textAlign:"center", padding:"13px", borderRadius:12, border:"1px solid rgba(255,255,255,.1)", color:"#888", fontSize:15, fontWeight:500, textDecoration:"none", display:"block" }}>Sign in</a>
-            <a href="/signup" style={{ width:"100%", textAlign:"center", padding:"13px", borderRadius:12, background:"linear-gradient(135deg,#3b82f6,#6366f1,#a855f7)", color:"#fff", fontSize:15, fontWeight:700, textDecoration:"none", display:"block", boxShadow:"0 4px 20px rgba(99,102,241,.35)" }}>Sign up free</a>
+            <a href="/signup" style={{ width:"100%", textAlign:"center", padding:"13px", borderRadius:12, background:"linear-gradient(135deg,#3b82f6,#6366f1,#a855f7)", color:"#fff", fontSize:15, fontWeight:700, textDecoration:"none", display:"block", boxShadow:"0 4px 20px rgba(99,102,241,.35)" }}>Start for free</a>
           </div>
         </div>
       )}
@@ -302,20 +302,20 @@ export function LoginPage() {
             <div className="a1" style={{ marginBottom:32 }}>
               <div className="badge-anim" style={{ display:"inline-flex", alignItems:"center", gap:8, background:"rgba(99,102,241,.1)", border:"1px solid rgba(99,102,241,.25)", borderRadius:100, padding:"5px 16px 5px 10px", marginBottom:24 }}>
                 <span className="dot-pulse" style={{ width:7, height:7, borderRadius:"50%", background:"#6366f1", display:"inline-block", flexShrink:0 }} />
-                <span style={{ fontSize:12, fontWeight:600, color:"#a5b4fc", fontFamily:"'JetBrains Mono',monospace", letterSpacing:".5px" }}>Welcome back</span>
+                <span style={{ fontSize:12, fontWeight:600, color:"#a5b4fc", fontFamily:"'JetBrains Mono',monospace", letterSpacing:".5px" }}>Welcome back, athlete</span>
               </div>
               <h1 style={{ fontSize:"clamp(28px,5vw,42px)", fontWeight:800, color:"#fff", letterSpacing:-1.8, lineHeight:1.1, marginBottom:10 }}>
-                Sign in to<br /><span className="grad-text">ForgeAI.</span>
+                Sign in to<br /><span className="grad-text">FitnessForgeAI.</span>
               </h1>
               <p style={{ fontSize:15, color:"#2e2e5a", lineHeight:1.65 }}>
-                Continue building stunning websites from a prompt.
+                Continue tracking workouts, nutrition & progress — all in one place.
               </p>
             </div>
 
             {/* ── Social Buttons ── */}
             <div className="a2 social-row" style={{ display:"flex", gap:12, marginBottom:24 }}>
               <button className="social-btn" onClick={()=>{
-                window.location.href = "http://localhost:5000/api/auth/google";
+                window.location.href = "https://forge-fit.onrender.com/api/auth/google";
               }}>
                 <svg width="17" height="17" viewBox="0 0 24 24">
                   <path fill="#EA4335" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -411,7 +411,7 @@ export function LoginPage() {
               {/* Sign up link */}
               <p className="a5" style={{ textAlign:"center", marginTop:22, fontSize:14, color:"#252550" }}>
                 Don't have an account?{" "}
-                <a href="/signup" style={{ color:"#818cf8", fontWeight:700, textDecoration:"none" }}>Create one free →</a>
+                <a href="/signup" style={{ color:"#818cf8", fontWeight:700, textDecoration:"none" }}>Start for free →</a>
               </p>
             </form>
 
@@ -419,7 +419,7 @@ export function LoginPage() {
             <div className="a5" style={{ marginTop:28, background:"rgba(99,102,241,.06)", border:"1px solid rgba(99,102,241,.14)", borderRadius:12, padding:"12px 16px", display:"flex", alignItems:"center", gap:10 }}>
               <span style={{ fontSize:16, flexShrink:0 }}>💡</span>
               <p style={{ fontSize:12, color:"#3a3a6a", fontFamily:"'JetBrains Mono',monospace", lineHeight:1.6 }}>
-                Demo: use <span style={{ color:"#818cf8", fontWeight:600 }}>demo@forgeai.com</span> with any password
+                Demo: use <span style={{ color:"#818cf8", fontWeight:600 }}>demo@fitnessforgeai.com</span> with any password
               </p>
             </div>
           </div>
@@ -431,18 +431,18 @@ export function LoginPage() {
           <div className="a1" style={{ marginBottom:40 }}>
             <h2 style={{ fontSize:"clamp(24px,2.5vw,36px)", fontWeight:800, color:"#fff", letterSpacing:-1.5, lineHeight:1.15, marginBottom:14 }}>
               Everything you need<br />
-              <span className="grad-text">to ship faster.</span>
+              <span className="grad-text">to crush your goals.</span>
             </h2>
             <p style={{ fontSize:15, color:"#2a2a52", lineHeight:1.75 }}>
-              Your account gives you instant access to AI website generation, visual editing, and one-click deploy.
+              Your account gives you instant access to AI workout plans, nutrition tracking, progress analytics, and personalised coaching.
             </p>
           </div>
 
           {/* Stats */}
           <div className="a2" style={{ display:"flex", flexDirection:"column", gap:12, marginBottom:40 }}>
             {[
-              { icon:"⚡", stat:"12s",    label:"Average generation time" },
-              { icon:"🌍", stat:"50K+",   label:"Sites shipped this month" },
+              { icon:"🔥", stat:"2.1M+",  label:"Workouts tracked this month" },
+              { icon:"🥗", stat:"98K+",   label:"Meal plans generated" },
               { icon:"★",  stat:"4.9/5",  label:"Average user rating" },
             ].map(item => (
               <div key={item.stat} className="stat-chip">
@@ -462,13 +462,13 @@ export function LoginPage() {
               {[1,2,3,4,5].map(i => <span key={i} style={{ color:"#fbbf24", fontSize:13 }}>★</span>)}
             </div>
             <p style={{ fontSize:14, color:"#4a4a82", lineHeight:1.75, marginBottom:16, fontStyle:"italic", position:"relative" }}>
-              "ForgeAI replaced my entire design workflow. Generated, tweaked, and deployed a client site in one afternoon."
+              "FitnessForgeAI transformed my training. Lost 12 kg in 3 months with AI meal plans and smart workout tracking."
             </p>
             <div style={{ display:"flex", alignItems:"center", gap:10 }}>
-              <div style={{ width:36, height:36, borderRadius:"50%", background:"linear-gradient(135deg,#6366f1,#a855f7)", display:"flex", alignItems:"center", justifyContent:"center", fontSize:13, fontWeight:700, color:"#fff", flexShrink:0 }}>SR</div>
+              <div style={{ width:36, height:36, borderRadius:"50%", background:"linear-gradient(135deg,#6366f1,#a855f7)", display:"flex", alignItems:"center", justifyContent:"center", fontSize:13, fontWeight:700, color:"#fff", flexShrink:0 }}>PS</div>
               <div>
-                <div style={{ fontSize:13, fontWeight:700, color:"#e2e2f0" }}>Sara Rizvi</div>
-                <div style={{ fontSize:11, color:"#2a2a52", fontFamily:"'JetBrains Mono',monospace" }}>Freelance Designer</div>
+                <div style={{ fontSize:13, fontWeight:700, color:"#e2e2f0" }}>Priya Sharma</div>
+                <div style={{ fontSize:11, color:"#2a2a52", fontFamily:"'JetBrains Mono',monospace" }}>Marathon Runner & Nutritionist</div>
               </div>
             </div>
           </div>
@@ -477,7 +477,7 @@ export function LoginPage() {
           <div className="a4" style={{ marginTop:24, display:"flex", alignItems:"center", gap:10 }}>
             <span style={{ fontSize:14, color:"#4ade80" }}>🔒</span>
             <span style={{ fontSize:12, color:"#1e1e3a", fontFamily:"'JetBrains Mono',monospace" }}>
-              256-bit SSL · SOC 2 compliant · GDPR ready
+              256-bit SSL · HIPAA compliant · GDPR ready
             </span>
           </div>
         </div>
