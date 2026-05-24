@@ -2,7 +2,7 @@ const express= require("express");
 const passport= require("passport");
 const { postSignUp, postLogin, getLogout, saveProfile, getProfile } = require("../controller/authmiddleware");
 const authMiddleware = require("../utils/authMiddleware");
-const User    = require("../models/User");
+const User    = require("../models/user");
 const Profile = require("../models/Profile");
 
 const router = express.Router();
