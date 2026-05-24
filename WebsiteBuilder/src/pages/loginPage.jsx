@@ -259,7 +259,7 @@ export function LoginPage() {
             {["Home","Features","Workouts","Nutrition"].map(l => (
               <a key={l} href="#" className="nav-link">{l}</a>
             ))}
-            <a href="/signup" style={{ display:"flex", alignItems:"center", gap:8, fontSize:14, fontWeight:600, color:"#fff", textDecoration:"none", background:"linear-gradient(135deg,#3b82f6,#6366f1,#a855f7)", padding:"8px 20px", borderRadius:10, boxShadow:"0 4px 20px rgba(99,102,241,.35)", whiteSpace:"nowrap" }}>
+            <a href="/signUp" style={{ display:"flex", alignItems:"center", gap:8, fontSize:14, fontWeight:600, color:"#fff", textDecoration:"none", background:"linear-gradient(135deg,#3b82f6,#6366f1,#a855f7)", padding:"8px 20px", borderRadius:10, boxShadow:"0 4px 20px rgba(99,102,241,.35)", whiteSpace:"nowrap" }}>
               Start for free
             </a>
           </div>
