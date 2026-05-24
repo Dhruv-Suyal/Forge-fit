@@ -14,7 +14,7 @@ connectDB();
 const app = express();
 
 app.use(cors({
-    origin: "https://forge-fit-alpha.vercel.app/", // frontend URL
+    origin: "https://forge-fit-alpha.vercel.app", // frontend URL
     credentials: true
 }));
 
