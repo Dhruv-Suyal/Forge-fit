@@ -13,17 +13,17 @@ const MEAL_CONFIG = {
 const FALLBACK_IMG = "https://images.unsplash.com/photo-1490645935967-10de6ba17061?w=800&q=80";
 
 // ── Single Diet Plan Card ─────────────────────────────────────────────────────
-function DietCard({ diet: initialDiet, index, onSave, saving }) {
-  const cardRef  = useRef(null);
-  const [diet,      setDiet]      = useState(initialDiet);
-  const [imgError,  setImgError]  = useState(false);
-  const [editMode,  setEditMode]  = useState(false);
-  const [expanded,  setExpanded]  = useState(false);
-  const [showDetail, setShowDetail] = useState(false);
+function DietCard({ diet: initialDiet, index, onSave, saving, onViewDetail }) {
+  const cardRef = useRef(null);
+  const [diet,     setDiet]     = useState(initialDiet);
+  const [imgError, setImgError] = useState(false);
+  const [editMode, setEditMode] = useState(false);
+  const [expanded, setExpanded] = useState(false);
 
   useEffect(() => {
     if (!cardRef.current) return;
-    gsap.fromTo(cardRef.current,
+    gsap.fromTo(
+      cardRef.current,
       { opacity: 0, y: 50, scale: 0.94 },
       { opacity: 1, y: 0, scale: 1, duration: 0.65, delay: index * 0.13, ease: "back.out(1.4)" }
     );
@@ -38,26 +38,46 @@ function DietCard({ diet: initialDiet, index, onSave, saving }) {
     onSave(diet, index);
   };
 
+  const handleEditToggle = () => {
+    setEditMode(m => !m);
+    if (editMode) setDiet(initialDiet); // revert on cancel
+  };
+
   return (
-    <div ref={cardRef} className="diet-glass"
+    <div
+      ref={cardRef}
+      className="diet-glass"
       style={{
-        opacity: 0, display: "flex", flexDirection: "column", overflow: "hidden",
+        opacity: 0,
+        display: "flex",
+        flexDirection: "column",
+        overflow: "hidden",
         border: "1px solid rgba(0,245,212,0.15)",
         boxShadow: "0 4px 32px rgba(0,0,0,0.4)",
         transition: "box-shadow 0.3s, border-color 0.3s",
+        borderRadius: 20,           /* ensure rounded corners on all screens */
       }}
-      onMouseEnter={e => { e.currentTarget.style.borderColor = "rgba(0,245,212,0.35)"; e.currentTarget.style.boxShadow = "0 8px 48px rgba(0,245,212,0.1)"; }}
-      onMouseLeave={e => { e.currentTarget.style.borderColor = "rgba(0,245,212,0.15)"; e.currentTarget.style.boxShadow = "0 4px 32px rgba(0,0,0,0.4)"; }}
+      onMouseEnter={e => {
+        e.currentTarget.style.borderColor = "rgba(0,245,212,0.35)";
+        e.currentTarget.style.boxShadow   = "0 8px 48px rgba(0,245,212,0.1)";
+      }}
+      onMouseLeave={e => {
+        e.currentTarget.style.borderColor = "rgba(0,245,212,0.15)";
+        e.currentTarget.style.boxShadow   = "0 4px 32px rgba(0,0,0,0.4)";
+      }}
     >
       {/* ── Image ── */}
       <div style={{ position: "relative", height: 200, overflow: "hidden", flexShrink: 0, background: "#000" }}>
-        <img src={imgSrc} alt={diet.title} onError={() => setImgError(true)}
-          style={{ width: "100%", height: "100%", objectFit: "cover", transition: "transform 0.5s ease", display: "block" }}
+        <img
+          src={imgSrc}
+          alt={diet.title}
+          onError={() => setImgError(true)}
+          style={{ width: "100%", height: "100%", objectFit: "cover", display: "block", transition: "transform 0.5s ease" }}
           onMouseEnter={e => gsap.to(e.currentTarget, { scale: 1.06, duration: 0.5 })}
-          onMouseLeave={e => gsap.to(e.currentTarget, { scale: 1, duration: 0.5 })}
+          onMouseLeave={e => gsap.to(e.currentTarget, { scale: 1,    duration: 0.5 })}
         />
         {/* Gradient overlay */}
-        <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: 90, background: "linear-gradient(to top, rgba(0,0,14,0.95), transparent)" }} />
+        <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: 90, background: "linear-gradient(to top, rgba(0,0,14,0.95), transparent)", pointerEvents: "none" }} />
 
         {/* Category badge */}
         <div style={{ position: "absolute", top: 12, left: 12 }}>
@@ -71,22 +91,24 @@ function DietCard({ diet: initialDiet, index, onSave, saving }) {
         </div>
 
         {/* Edit toggle */}
-        <button onClick={() => { setEditMode(m => !m); if (editMode) setDiet(initialDiet); }}
+        <button
+          onClick={handleEditToggle}
+          aria-label={editMode ? "Cancel edit" : "Edit plan"}
           style={{
             position: "absolute", top: 12, right: 12,
-            width: 30, height: 30, borderRadius: "50%", border: "none", cursor: "pointer",
+            width: 32, height: 32, borderRadius: "50%", cursor: "pointer",
             background: editMode ? "rgba(0,245,212,0.2)" : "rgba(0,0,0,0.5)",
             border: `1px solid ${editMode ? "rgba(0,245,212,0.5)" : "rgba(255,255,255,0.2)"}`,
             color: editMode ? "#00f5d4" : "#fff",
-            display: "flex", alignItems: "center", justifyContent: "center", fontSize: 13,
+            display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14,
             backdropFilter: "blur(4px)", transition: "all 0.2s",
           }}
         >
           {editMode ? <FiX /> : <FiEdit2 />}
         </button>
 
-        {/* Calorie badge on image */}
-        <div style={{ position: "absolute", bottom: 14, right: 14 }}>
+        {/* Calorie badge */}
+        <div style={{ position: "absolute", bottom: 14, right: 14, pointerEvents: "none" }}>
           <span style={{
             fontFamily: "var(--font-mono)", fontSize: 15, fontWeight: 700, color: "#f59e0b",
             textShadow: "0 0 16px rgba(245,158,11,0.6)",
@@ -97,42 +119,49 @@ function DietCard({ diet: initialDiet, index, onSave, saving }) {
       </div>
 
       {/* ── Body ── */}
-      <div style={{ padding: "18px 20px 20px", flex: 1, display: "flex", flexDirection: "column", gap: 14 }}>
+      <div style={{ padding: "18px 18px 20px", flex: 1, display: "flex", flexDirection: "column", gap: 14 }}>
 
         {/* Title */}
         {editMode ? (
-          <input value={diet.title || ""} onChange={e => setDiet(p => ({ ...p, title: e.target.value }))}
+          <input
+            value={diet.title || ""}
+            onChange={e => setDiet(p => ({ ...p, title: e.target.value }))}
             style={{
               background: "rgba(255,255,255,0.06)", border: "1px solid rgba(0,245,212,0.3)",
               borderRadius: 10, padding: "8px 12px", color: "#fff",
-              fontFamily: "var(--font-main)", fontWeight: 800, fontSize: 16,
+              fontFamily: "var(--font-main)", fontWeight: 800, fontSize: 15,
               width: "100%", outline: "none", boxSizing: "border-box",
             }}
           />
         ) : (
-          <h3 style={{ margin: 0, fontFamily: "var(--font-main)", fontWeight: 800, fontSize: 16, color: "#fff", letterSpacing: "-0.4px", lineHeight: 1.3 }}>
+          <h3 style={{ margin: 0, fontFamily: "var(--font-main)", fontWeight: 800, fontSize: 15, color: "#fff", letterSpacing: "-0.4px", lineHeight: 1.3 }}>
             {diet.title}
           </h3>
         )}
 
-        {/* Goal + calories row */}
+        {/* Goal + calories edit row */}
         <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
           {editMode ? (
-            <input value={diet.goal || ""} onChange={e => setDiet(p => ({ ...p, goal: e.target.value }))}
-              placeholder="Goal"
-              style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(0,245,212,0.2)", borderRadius: 8, padding: "5px 10px", color: "#fff", fontFamily: "var(--font-main)", fontSize: 12, fontWeight: 600, outline: "none", flex: 1 }}
-            />
+            <>
+              <input
+                value={diet.goal || ""}
+                onChange={e => setDiet(p => ({ ...p, goal: e.target.value }))}
+                placeholder="Goal"
+                style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(0,245,212,0.2)", borderRadius: 8, padding: "5px 10px", color: "#fff", fontFamily: "var(--font-main)", fontSize: 12, fontWeight: 600, outline: "none", flex: 1, minWidth: 80 }}
+              />
+              <input
+                value={diet.totalCalories || ""}
+                onChange={e => setDiet(p => ({ ...p, totalCalories: Number(e.target.value) }))}
+                type="number"
+                placeholder="Calories"
+                style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(0,245,212,0.2)", borderRadius: 8, padding: "5px 10px", color: "#f59e0b", fontFamily: "var(--font-mono)", fontSize: 12, fontWeight: 700, outline: "none", width: 100 }}
+              />
+            </>
           ) : diet.goal ? (
             <span style={{ fontFamily: "var(--font-main)", fontSize: 11, color: "rgba(255,255,255,0.45)", background: "rgba(255,255,255,0.04)", padding: "3px 10px", borderRadius: 99, border: "1px solid rgba(255,255,255,0.08)" }}>
               🎯 {diet.goal}
             </span>
           ) : null}
-          {editMode && (
-            <input value={diet.totalCalories || ""} onChange={e => setDiet(p => ({ ...p, totalCalories: Number(e.target.value) }))}
-              type="number" placeholder="Calories"
-              style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(0,245,212,0.2)", borderRadius: 8, padding: "5px 10px", color: "#f59e0b", fontFamily: "var(--font-mono)", fontSize: 12, fontWeight: 700, outline: "none", width: 100 }}
-            />
-          )}
         </div>
 
         {/* Meals list */}
@@ -140,7 +169,11 @@ function DietCard({ diet: initialDiet, index, onSave, saving }) {
           {(diet.meals || []).slice(0, expanded ? undefined : 2).map((meal, i) => {
             const cfg = MEAL_CONFIG[meal.type] ?? MEAL_CONFIG.Dinner;
             return (
-              <div key={i} style={{ display: "flex", alignItems: "center", gap: 10, padding: "8px 10px", borderRadius: 10, background: "rgba(255,255,255,0.03)", border: `1px solid ${cfg.color}22` }}>
+              <div key={i} style={{
+                display: "flex", alignItems: "center", gap: 10,
+                padding: "8px 10px", borderRadius: 10,
+                background: "rgba(255,255,255,0.03)", border: `1px solid ${cfg.color}22`,
+              }}>
                 <span style={{ fontSize: 16, flexShrink: 0 }}>{cfg.icon}</span>
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ fontFamily: "var(--font-mono)", fontSize: 9, color: cfg.color, letterSpacing: "1.5px", textTransform: "uppercase", fontWeight: 700 }}>{meal.type}</div>
@@ -151,58 +184,72 @@ function DietCard({ diet: initialDiet, index, onSave, saving }) {
             );
           })}
           {(diet.meals || []).length > 2 && (
-            <button onClick={() => setExpanded(e => !e)} style={{ background: "none", border: "none", cursor: "pointer", fontFamily: "var(--font-main)", fontSize: 11, color: "rgba(0,245,212,0.55)", padding: "2px 0", textAlign: "left" }}>
-              {expanded ? "▲ Show less" : `▼ +${(diet.meals.length - 2)} more meals`}
+            <button
+              onClick={() => setExpanded(e => !e)}
+              style={{ background: "none", border: "none", cursor: "pointer", fontFamily: "var(--font-main)", fontSize: 11, color: "rgba(0,245,212,0.55)", padding: "2px 0", textAlign: "left" }}
+            >
+              {expanded ? "▲ Show less" : `▼ +${diet.meals.length - 2} more meals`}
             </button>
           )}
         </div>
 
-        {/* Buttons */}
+        {/* Action buttons */}
         <div style={{ marginTop: "auto", paddingTop: 4, display: "flex", gap: 10 }}>
-          <button onClick={() => setShowDetail(true)} disabled={saving}
+          {/* View Full — lifts detail to parent so modal renders at root level */}
+          <button
+            onClick={() => onViewDetail(diet)}
+            disabled={saving}
             style={{
-              flex: 1, padding: "12px", borderRadius: 12, border: "1px solid rgba(0,245,212,0.3)",
+              flex: 1, padding: "11px 8px", borderRadius: 12,
+              border: "1px solid rgba(0,245,212,0.3)",
               background: "transparent", cursor: "pointer",
               color: "#00f5d4", fontFamily: "var(--font-main)", fontWeight: 700, fontSize: 13,
-              display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
-              transition: "all 0.25s",
+              display: "flex", alignItems: "center", justifyContent: "center", gap: 7,
+              transition: "all 0.25s", whiteSpace: "nowrap",
             }}
+            onMouseEnter={e => { e.currentTarget.style.background = "rgba(0,245,212,0.07)"; }}
+            onMouseLeave={e => { e.currentTarget.style.background = "transparent"; }}
           >
             <FiEye /> View Full
           </button>
 
-          <button onClick={handleSave} disabled={saving}
+          <button
+            onClick={handleSave}
+            disabled={saving}
             style={{
-              flex: 1, padding: "12px", borderRadius: 12, border: "none", cursor: saving ? "not-allowed" : "pointer",
+              flex: 1, padding: "11px 8px", borderRadius: 12, border: "none",
+              cursor: saving ? "not-allowed" : "pointer",
               background: saving ? "rgba(255,255,255,0.05)" : "linear-gradient(135deg,#00f5d4,#7c3aed)",
               color: saving ? "rgba(255,255,255,0.4)" : "#000",
               fontFamily: "var(--font-main)", fontWeight: 700, fontSize: 13,
-              display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+              display: "flex", alignItems: "center", justifyContent: "center", gap: 7,
               boxShadow: !saving ? "0 4px 20px rgba(0,245,212,0.2)" : "none",
               transition: "all 0.25s",
               opacity: saving ? 0.7 : 1,
+              whiteSpace: "nowrap",
             }}
           >
             {saving ? (
-              <><span style={{ width: 14, height: 14, borderRadius: "50%", border: "2px solid transparent", borderTopColor: "#00f5d4", animation: "diet-spin 0.8s linear infinite", display: "inline-block" }} />Saving...</>
+              <>
+                <span style={{ width: 13, height: 13, borderRadius: "50%", border: "2px solid transparent", borderTopColor: "#00f5d4", animation: "diet-spin 0.8s linear infinite", display: "inline-block" }} />
+                Saving…
+              </>
             ) : (
-              <>{editMode ? <FiCheck /> : <FiSave />}{editMode ? "Save Edited" : "Save"}</>
+              <>{editMode ? <FiCheck /> : <FiSave />} {editMode ? "Save Edit" : "Save"}</>
             )}
           </button>
         </div>
-
-        {/* Detailed View Modal */}
-        {showDetail && (
-          <DietDetailedView diet={diet} onClose={() => setShowDetail(false)} />
-        )}
       </div>
     </div>
   );
 }
 
-// ── Preview Section (3 cards) ─────────────────────────────────────────────────
+// ── Preview Section (grid of cards) ──────────────────────────────────────────
 export function DietMealPreview({ diets, onSave, onRegenerate, saving, savingId }) {
-  const sectionRef = useRef(null);
+  const sectionRef  = useRef(null);
+  // Lift detail state here so the modal portal renders at the top of the tree,
+  // outside any overflow:hidden card ancestor.
+  const [detailDiet, setDetailDiet] = useState(null);
 
   useEffect(() => {
     if (!sectionRef.current || !diets?.length) return;
@@ -212,38 +259,74 @@ export function DietMealPreview({ diets, onSave, onRegenerate, saving, savingId 
   if (!diets?.length) return null;
 
   return (
-    <section ref={sectionRef} style={{ padding: "0 24px 80px", maxWidth: 1200, margin: "0 auto", opacity: 0 }}>
-      {/* Header */}
-      <div style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "rgba(0,245,212,0.5)", letterSpacing: "2.5px", textAlign: "center", marginBottom: 12 }}>── AI RESULTS ──</div>
-      <h2 style={{ textAlign: "center", fontFamily: "var(--font-main)", fontWeight: 800, fontSize: "clamp(24px,4vw,40px)", color: "#fff", marginBottom: 8, letterSpacing: "-1px" }}>
-        Choose Your <span className="diet-gradient-text">Diet Plan</span>
-      </h2>
-      <p style={{ textAlign: "center", color: "rgba(255,255,255,0.35)", fontFamily: "var(--font-main)", fontSize: 14, marginBottom: 40 }}>
-        AI generated {diets.length} variations — pick one that fits, or edit before saving.
-      </p>
+    <>
+      <section
+        ref={sectionRef}
+        style={{
+          padding: "0 16px 80px",
+          maxWidth: 1200,
+          margin: "0 auto",
+          opacity: 0,
+          /* Responsive horizontal padding */
+          paddingLeft: "max(16px, env(safe-area-inset-left))",
+          paddingRight: "max(16px, env(safe-area-inset-right))",
+        }}
+      >
+        {/* Header */}
+        <div style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "rgba(0,245,212,0.5)", letterSpacing: "2.5px", textAlign: "center", marginBottom: 12 }}>
+          ── AI RESULTS ──
+        </div>
+        <h2 style={{ textAlign: "center", fontFamily: "var(--font-main)", fontWeight: 800, fontSize: "clamp(22px,5vw,40px)", color: "#fff", marginBottom: 8, letterSpacing: "-1px" }}>
+          Choose Your <span className="diet-gradient-text">Diet Plan</span>
+        </h2>
+        <p style={{ textAlign: "center", color: "rgba(255,255,255,0.35)", fontFamily: "var(--font-main)", fontSize: "clamp(13px,2vw,14px)", marginBottom: 40 }}>
+          AI generated {diets.length} variation{diets.length !== 1 ? "s" : ""} — pick one that fits, or edit before saving.
+        </p>
 
-      {/* Cards grid */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(300px,1fr))", gap: 24, marginBottom: 32 }}>
-        {diets.map((d, i) => (
-          <DietCard key={i} diet={d} index={i} onSave={onSave} saving={saving && savingId === i} />
-        ))}
-      </div>
+        {/* Responsive cards grid */}
+        <div style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(auto-fill, minmax(min(100%, 300px), 1fr))",
+          gap: "clamp(14px, 3vw, 24px)",
+          marginBottom: 32,
+        }}>
+          {diets.map((d, i) => (
+            <DietCard
+              key={i}
+              diet={d}
+              index={i}
+              onSave={onSave}
+              saving={saving && savingId === i}
+              onViewDetail={setDetailDiet}   /* ← lifted handler */
+            />
+          ))}
+        </div>
 
-      {/* Regenerate */}
-      <div style={{ textAlign: "center" }}>
-        <button onClick={onRegenerate}
-          style={{
-            padding: "12px 28px", borderRadius: 12, cursor: "pointer",
-            background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.12)",
-            color: "rgba(255,255,255,0.5)", fontFamily: "var(--font-main)", fontSize: 13, fontWeight: 600,
-            display: "inline-flex", alignItems: "center", gap: 8, transition: "all 0.2s",
-          }}
-          onMouseEnter={e => { e.currentTarget.style.borderColor = "rgba(0,245,212,0.35)"; e.currentTarget.style.color = "#00f5d4"; }}
-          onMouseLeave={e => { e.currentTarget.style.borderColor = "rgba(255,255,255,0.12)"; e.currentTarget.style.color = "rgba(255,255,255,0.5)"; }}
-        >
-          <FiRefreshCw /> Regenerate All
-        </button>
-      </div>
-    </section>
+        {/* Regenerate */}
+        <div style={{ textAlign: "center" }}>
+          <button
+            onClick={onRegenerate}
+            style={{
+              padding: "12px 28px", borderRadius: 12, cursor: "pointer",
+              background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.12)",
+              color: "rgba(255,255,255,0.5)", fontFamily: "var(--font-main)", fontSize: 13, fontWeight: 600,
+              display: "inline-flex", alignItems: "center", gap: 8, transition: "all 0.2s",
+            }}
+            onMouseEnter={e => { e.currentTarget.style.borderColor = "rgba(0,245,212,0.35)"; e.currentTarget.style.color = "#00f5d4"; }}
+            onMouseLeave={e => { e.currentTarget.style.borderColor = "rgba(255,255,255,0.12)"; e.currentTarget.style.color = "rgba(255,255,255,0.5)"; }}
+          >
+            <FiRefreshCw /> Regenerate All
+          </button>
+        </div>
+      </section>
+
+      {/* ── Detail modal — rendered OUTSIDE the section so no overflow:hidden clips it ── */}
+      {detailDiet && (
+        <DietDetailedView
+          diet={detailDiet}
+          onClose={() => setDetailDiet(null)}
+        />
+      )}
+    </>
   );
 }
