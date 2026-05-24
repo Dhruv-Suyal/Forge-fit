@@ -1,6 +1,6 @@
 const express= require("express");
 const passport= require("passport");
-const { postSignUp, postLogin, getLogout, saveProfile, getProfile } = require("../controller/authmiddleware");
+const { postSignUp, postLogin, getLogout, saveProfile, getProfile, updateProfile, getTodayScore } = require("../controller/authmiddleware");
 const authMiddleware = require("../utils/authMiddleware");
 const User    = require("../models/user");
 const Profile = require("../models/Profile");
@@ -55,6 +55,12 @@ router.get("/me", authMiddleware, async (req, res)=>{
 
 // Dedicated profile endpoint
 router.get("/profile", authMiddleware, getProfile);
+
+// Update profile endpoint
+router.put("/profile", authMiddleware, updateProfile);
+
+// Get today's score
+router.get("/score/today", authMiddleware, getTodayScore);
 
 router.get("/logout", getLogout);
 

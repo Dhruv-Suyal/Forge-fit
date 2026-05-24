@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { ProfileEditModal } from "./ProfileEditModal";
 import api from "../utils/axios";
 
 // ─── NAV LINKS ────────────────────────────────────────────────────────────────
@@ -16,10 +17,10 @@ function Avatar({ user, size = 36 }) {
     ? user.name.split(" ").map(n => n[0]).join("").slice(0, 2).toUpperCase()
     : "U";
 
-  if (user?.photo) {
+  if (user?.avatar) {
     return (
       <img
-        src={user.photo}
+        src={user.avatar}
         alt={user.name || "User"}
         style={{
           width: size, height: size, borderRadius: "50%",
@@ -54,7 +55,18 @@ export function Header() {
   const [scrolled,      setScrolled]      = useState(false);
   const [mobileOpen,    setMobileOpen]    = useState(false);
   const [profileOpen,   setProfileOpen]   = useState(false);
+  const [profileEditOpen, setProfileEditOpen] = useState(false);
+  const [todayScore,    setTodayScore]    = useState(0);
   const profileRef = useRef(null);
+
+  // ── fetch today's score ──
+  useEffect(() => {
+    if (user) {
+      api.get("/auth/score/today")
+        .then(res => setTodayScore(res.data.score || 0))
+        .catch(() => setTodayScore(0));
+    }
+  }, [user]);
 
   // ── scroll detection ──
   useEffect(() => {
@@ -84,9 +96,15 @@ export function Header() {
   }, []);
 
   async function handleLogout() {
-    setProfileOpen(false); setMobileOpen(false);
-    try { await api.get("/auth/logout"); } catch {}
+    setProfileOpen(false); 
+    setMobileOpen(false);
+    try { 
+      await api.get("/auth/logout"); 
+    } catch (err) {
+      console.error("Logout error:", err);
+    }
     setUser(null);
+    localStorage.removeItem("token");
     navigate("/");
   }
 
@@ -146,7 +164,7 @@ export function Header() {
         /* DESKTOP NAV */
         .ffit-nav {
           display: flex; align-items: center; gap: 2px;
-          flex: 1; /* takes remaining space, links left-align */
+          flex: 1;
           margin-left: 28px;
         }
         @media (max-width: 767px) { .ffit-nav { display: none; } }
@@ -419,7 +437,7 @@ export function Header() {
               <div className="ffit-score-chip">
                 <div className="ffit-score-dot" />
                 <span className="ffit-score-label">SCORE</span>
-                <span className="ffit-score-val">87</span>
+                <span className="ffit-score-val">{todayScore}</span>
               </div>
             )}
 
@@ -452,14 +470,8 @@ export function Header() {
                     </div>
 
                     <div className="ffit-dd-body">
-                      <button className="ffit-dd-item" onClick={() => { setProfileOpen(false); navigate("/dashboard"); }}>
-                        <span className="ffit-dd-icon">⚡</span> Dashboard
-                      </button>
-                      <button className="ffit-dd-item" onClick={() => { setProfileOpen(false); navigate("/profile"); }}>
-                        <span className="ffit-dd-icon">◈</span> My Profile
-                      </button>
-                      <button className="ffit-dd-item" onClick={() => { setProfileOpen(false); navigate("/settings"); }}>
-                        <span className="ffit-dd-icon">⟡</span> Settings
+                      <button className="ffit-dd-item" onClick={() => { setProfileOpen(false); setProfileEditOpen(true); }}>
+                        <span className="ffit-dd-icon">👤</span> Edit Profile
                       </button>
                       <div className="ffit-dd-sep" />
                       <button className="ffit-dd-item danger" onClick={handleLogout}>
@@ -521,14 +533,8 @@ export function Header() {
           {/* Account actions (logged in) */}
           {user && (
             <div className="ffit-mob-actions">
-              <button className="ffit-mob-action" onClick={() => navigate("/dashboard")}>
-                <span>⚡</span> Dashboard
-              </button>
-              <button className="ffit-mob-action" onClick={() => navigate("/profile")}>
-                <span>◈</span> My Profile
-              </button>
-              <button className="ffit-mob-action" onClick={() => navigate("/settings")}>
-                <span>⟡</span> Settings
+              <button className="ffit-mob-action" onClick={() => { setMobileOpen(false); setProfileEditOpen(true); }}>
+                <span>👤</span> Edit Profile
               </button>
               <button className="ffit-mob-action danger" onClick={handleLogout}>
                 <span>→</span> Log out
@@ -545,6 +551,9 @@ export function Header() {
           )}
         </div>
       </div>
+
+      {/* Profile Edit Modal */}
+      <ProfileEditModal isOpen={profileEditOpen} onClose={() => setProfileEditOpen(false)} />
     </>
   );
 }

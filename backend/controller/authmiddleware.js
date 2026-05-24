@@ -200,16 +200,100 @@ exports.getProfile = async (req, res) => {
 };
 
 exports.getLogout = (req, res) => {
-
     res.clearCookie("token", {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
-        sameSite:"none",
+        sameSite: "none",
         maxAge: 7 * 24 * 60 * 60 * 1000
     });
 
     res.json({
+        success: true,
         message: "Logged out successfully"
     });
+};
 
-}
+// Update user profile information
+exports.updateProfile = async (req, res) => {
+    try {
+        const { name, displayName, photo, bio, dateOfBirth, biologicalSex, height, weight, primaryGoal, location } = req.body;
+        
+        // Update user document
+        if (name) {
+            await User.findByIdAndUpdate(req.user.id, { name }, { new: true });
+        }
+
+        // Update profile document if profile exists
+        const updateData = {};
+        if (displayName) updateData.displayName = displayName;
+        if (dateOfBirth) updateData.dateOfBirth = dateOfBirth;
+        if (biologicalSex) updateData.biologicalSex = biologicalSex;
+        if (height) updateData.height = height;
+        if (weight) updateData.weight = weight;
+        if (primaryGoal) updateData.primaryGoal = primaryGoal;
+        if (location) updateData.location = location;
+        if (photo) updateData.photo = photo;
+
+        // Calculate BMI and TDEE if weight/height provided
+        if (height && weight) {
+            updateData.bmi = (weight / ((height / 100) * (height / 100))).toFixed(1);
+            updateData.tdee = Math.round(weight * 24 * 1.55);
+        }
+
+        let profile = await Profile.findOne({ userId: req.user.id });
+        
+        if (profile) {
+            profile = await Profile.findOneAndUpdate(
+                { userId: req.user.id },
+                updateData,
+                { new: true }
+            );
+        } else {
+            profile = await Profile.create({
+                userId: req.user.id,
+                ...updateData
+            });
+        }
+
+        const user = await User.findById(req.user.id).select("-password");
+        
+        res.json({
+            success: true,
+            message: "Profile updated successfully",
+            user,
+            profile
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: error.message
+        });
+    }
+};
+
+// Get today's wellness score
+exports.getTodayScore = async (req, res) => {
+    try {
+        const WellnessLog = require('../models/WellnessLog');
+        const today = new Date().toISOString().split('T')[0];
+        
+        const log = await WellnessLog.findOne({
+            userId: req.user.id,
+            date: today
+        });
+
+        const score = log?.score || 0;
+        
+        res.json({
+            success: true,
+            score,
+            date: today
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: error.message,
+            score: 0
+        });
+    }
+};

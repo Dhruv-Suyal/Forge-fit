@@ -8,6 +8,10 @@ const profileSchema = new mongoose.Schema({
    },
    displayName:String,
 
+   photo:String,
+
+   bio:String,
+
    dateOfBirth:String,
 
    biologicalSex:{
