@@ -12,7 +12,7 @@ router.get("/google",
 );
 
 router.get("/google/callback",
-    passport.authenticate("google", {session:false,  failureRedirect: "http://localhost:5173/logIn"}),
+    passport.authenticate("google", {session:false,  failureRedirect: "https://forge-fit-alpha.vercel.app/logIn"}),
     (req, res)=>{
         const {token, user} = req.user;
         res.cookie("token", token, {
@@ -22,10 +22,10 @@ router.get("/google/callback",
             maxAge: 7 * 24 * 60 * 60 * 1000
         })
         if(user.onboardingCompleted){
-         res.redirect("http://localhost:5173/");
+         res.redirect("https://forge-fit-alpha.vercel.app");
       }
       else{
-         res.redirect("http://localhost:5173/onboarding");
+         res.redirect("https://forge-fit-alpha.vercel.app/onboarding");
       }
        
     }
