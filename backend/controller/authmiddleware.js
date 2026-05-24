@@ -40,7 +40,7 @@ exports.postSignUp = async (req, res) => {
         res.cookie("token", token, {
             httpOnly: true,
             secure: process.env.NODE_ENV === "production",
-            sameSite: "lax"
+            sameSite: "none"
         });
 
         const { password: _, ...safeUser } = newUser._doc;
@@ -79,7 +79,7 @@ exports.postLogin = async (req, res) => {
         res.cookie("token", token, {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
-            sameSite: "lax",
+            sameSite: "none",
             maxAge: 7 * 24 * 60 * 60 * 1000
         });
 
@@ -204,7 +204,7 @@ exports.getLogout = (req, res) => {
     res.clearCookie("token", {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
-        sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+        sameSite:"none",
         maxAge: 7 * 24 * 60 * 60 * 1000
     });
 
